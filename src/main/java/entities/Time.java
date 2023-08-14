@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package entities;
 
 import utils.StringFormatter;
@@ -55,6 +50,7 @@ public class Time {
         this.week = week;
     }
 
+    @Override
     public String toString() {
         return StringFormatter.printObject(this);
     }

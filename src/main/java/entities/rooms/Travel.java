@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package entities.rooms;
 
 import utils.StringFormatter;
@@ -35,6 +30,7 @@ public class Travel {
         this.value = value;
     }
 
+    @Override
     public String toString() {
         return StringFormatter.printObject(this);
     }

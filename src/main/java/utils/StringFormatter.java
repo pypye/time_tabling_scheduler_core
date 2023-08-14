@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package utils;
 
 import java.lang.reflect.Field;
@@ -18,11 +13,9 @@ public class StringFormatter {
             try {
                 attribute.setAccessible(true);
                 return String.format("%s=%s", attribute.getName(), attribute.get(object));
-            } catch (IllegalAccessException var3) {
-                throw new RuntimeException(var3);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
             }
-        }).reduce((attribute1, attribute2) -> {
-            return String.format("%s, %s", attribute1, attribute2);
-        }).orElse(""));
+        }).reduce((attribute1, attribute2) -> String.format("%s, %s", attribute1, attribute2)).orElse(""));
     }
 }

@@ -1,12 +1,19 @@
 package main;
 
-import utils.DataLoader;
+import com.google.ortools.Loader;
+import core.Solver;
 
 public class Main {
     public Main() {
     }
 
-    public static void main(String[] args) {
-        new DataLoader("src/main/resources/data/lums-sum17.xml");
+    static {
+        Loader.loadNativeLibraries();
     }
+
+    public static void main(String[] args) {
+//        new DataLoader("src/main/resources/data/lums-sum17.xml");
+        new Solver();
+    }
+
 }

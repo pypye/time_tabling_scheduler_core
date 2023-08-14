@@ -1,11 +1,8 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package entities;
 
 import entities.courses.Course;
+import utils.StringFormatter;
+
 import java.util.List;
 
 public class Student {
@@ -13,5 +10,31 @@ public class Student {
     private List<Course> courseList;
 
     public Student() {
+    }
+
+    public Student(String id, List<Course> courseList) {
+        this.id = id;
+        this.courseList = courseList;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public List<Course> getCourseList() {
+        return courseList;
+    }
+
+    public void setCourseList(List<Course> courseList) {
+        this.courseList = courseList;
+    }
+
+    @Override
+    public String toString() {
+        return StringFormatter.printObject(this);
     }
 }

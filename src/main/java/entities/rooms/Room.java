@@ -1,12 +1,9 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package entities.rooms;
 
 import entities.Time;
+
 import java.util.List;
+
 import utils.StringFormatter;
 
 public class Room {
@@ -57,6 +54,7 @@ public class Room {
         this.unavailableList = unavailableList;
     }
 
+    @Override
     public String toString() {
         return StringFormatter.printObject(this);
     }
