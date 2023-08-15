@@ -2,6 +2,8 @@ package main;
 
 import com.google.ortools.Loader;
 import core.Solver;
+import entities.Problem;
+import utils.DataLoader;
 
 public class Main {
     public Main() {
@@ -12,8 +14,10 @@ public class Main {
     }
 
     public static void main(String[] args) {
-//        new DataLoader("src/main/resources/data/lums-sum17.xml");
-        new Solver();
+        DataLoader dataLoader = new DataLoader("src/main/resources/data/lums-sum17.xml");
+        Problem problem = dataLoader.getProblem();
+        Solver solver = new Solver(problem);
+        solver.buildModel();
     }
 
 }

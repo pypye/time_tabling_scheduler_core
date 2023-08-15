@@ -13,15 +13,18 @@ public class Class {
     private List<Integer> roomsPenaltyList;
     private List<Time> availableTimeList;
 
+    private List<Integer> timePenaltyList;
+
     public Class() {
     }
 
-    public Class(String id, int limit, List<Room> roomList, List<Integer> roomsPenaltyList, List<Time> availableTimeList) {
+    public Class(String id, int limit, List<Room> roomList, List<Integer> roomsPenaltyList, List<Time> availableTimeList, List<Integer> timePenaltyList) {
         this.id = id;
         this.limit = limit;
         this.roomList = roomList;
         this.roomsPenaltyList = roomsPenaltyList;
         this.availableTimeList = availableTimeList;
+        this.timePenaltyList = timePenaltyList;
     }
 
     public String getId() {
@@ -62,6 +65,14 @@ public class Class {
 
     public void setAvailableTimeList(List<Time> availableTimeList) {
         this.availableTimeList = availableTimeList;
+    }
+
+    public List<Integer> getTimePenaltyList() {
+        return timePenaltyList;
+    }
+
+    public void setTimePenaltyList(List<Integer> timePenaltyList) {
+        this.timePenaltyList = timePenaltyList;
     }
 
     @Override

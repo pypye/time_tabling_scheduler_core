@@ -1,37 +1,35 @@
 package utils;
 
-import entities.Student;
-import entities.courses.Course;
-import entities.rooms.Room;
+import entities.Problem;
 import org.w3c.dom.Document;
-import utils.parser.CoursesParser;
-import utils.parser.DataParser;
-import utils.parser.RoomsParser;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
-import java.util.List;
+
+import static utils.parser.DataParser.parseProblem;
 
 public class DataLoader {
+    private final Problem problem;
     public DataLoader(String path) {
         try {
-            parse(path);
+            this.problem = parse(path);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
     }
 
-    private static void parse(String path) throws Exception {
+    private static Problem parse(String path) throws Exception {
         File inputFile = new File(path);
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document doc = dBuilder.parse(inputFile);
         doc.getDocumentElement().normalize();
-        List<Room> roomArr = RoomsParser.parseRoom(doc.getElementsByTagName("rooms").item(0).getChildNodes());
-        List<Course> courseArr = CoursesParser.parseCourse(doc.getElementsByTagName("courses").item(0).getChildNodes());
-        List<Student> studentArr = DataParser.parseStudent(doc.getElementsByTagName("students").item(0).getChildNodes());
-        System.out.println(studentArr);
+        return parseProblem(doc);
+    }
+
+    public Problem getProblem() {
+        return problem;
     }
 }
