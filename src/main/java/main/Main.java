@@ -18,6 +18,7 @@ public class Main {
         Problem problem = dataLoader.getProblem();
         Solver solver = new Solver(problem);
         solver.buildModel();
+        solver.solve();
     }
 
 }

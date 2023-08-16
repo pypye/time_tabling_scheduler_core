@@ -4,17 +4,19 @@ import com.google.ortools.sat.CpSolverSolutionCallback;
 import com.google.ortools.sat.IntVar;
 
 public class SolverCallback extends CpSolverSolutionCallback {
-    private final IntVar[] variableArr;
+    private final IntVar[] room;
+    private final IntVar[] hour;
     private int solutionCount = 0;
 
-    public SolverCallback(IntVar[] variables) {
-        this.variableArr = variables;
+    public SolverCallback(IntVar[] room, IntVar[] hour) {
+        this.room = room;
+        this.hour = hour;
     }
 
     @Override
     public void onSolutionCallback() {
-        for (IntVar variable : this.variableArr) {
-            System.out.println(variable + " = " + value(variable));
+        for(int i = 0; i < room.length; i++) {
+            System.out.println("Class " + i + " is in room " + this.value(room[i]) + " at hour " + this.value(hour[i]));
         }
         this.solutionCount++;
     }
