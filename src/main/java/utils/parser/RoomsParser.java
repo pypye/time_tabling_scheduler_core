@@ -25,7 +25,7 @@ public class RoomsParser {
                 Element roomElement = (Element) room;
                 Room roomObj = new Room();
                 roomObj.setId(roomElement.getAttribute("id"));
-                roomObj.setCapacity(Integer.parseInt(roomElement.getAttribute("capacity")));
+//                roomObj.setCapacity(Integer.parseInt(roomElement.getAttribute("capacity")));
 //                roomObj.setTravelList(parseTravel(roomElement.getElementsByTagName("travel")));
 //                roomObj.setUnavailableList(parseTime(roomElement.getElementsByTagName("unavailable")));
                 roomArr.add(roomObj);

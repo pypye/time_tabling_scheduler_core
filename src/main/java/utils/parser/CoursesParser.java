@@ -11,6 +11,9 @@ import org.w3c.dom.NodeList;
 import java.util.ArrayList;
 import java.util.List;
 
+import static utils.parser.DataParser.parseTime;
+import static utils.parser.RoomsParser.parseRoom;
+
 public class CoursesParser {
     public CoursesParser() {
     }
@@ -71,6 +74,8 @@ public class CoursesParser {
                 Class classObj = new Class();
                 classObj.setId(classElement.getAttribute("id"));
                 classObj.setLimit(Integer.parseInt(classElement.getAttribute("limit")));
+                classObj.setRoomList(parseRoom(classElement.getElementsByTagName("room")));
+                classObj.setAvailableTimeList(parseTime(classElement.getElementsByTagName("time")));
                 classArr.add(classObj);
             }
         }
