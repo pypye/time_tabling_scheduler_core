@@ -18,4 +18,12 @@ public class StringFormatter {
             }
         }).reduce((attribute1, attribute2) -> String.format("%s, %s", attribute1, attribute2)).orElse(""));
     }
+
+    public static Long[] convertFromString(String timeSlot) {
+        Long[] result = new Long[timeSlot.length()];
+        for (int i = 0; i < timeSlot.length(); i++) {
+            result[i] = timeSlot.charAt(i) == '1' ? 1L : 0L;
+        }
+        return result;
+    }
 }

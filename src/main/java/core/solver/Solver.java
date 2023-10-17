@@ -1,4 +1,4 @@
-package core;
+package core.solver;
 
 import com.google.ortools.sat.*;
 import entities.Problem;
@@ -6,6 +6,7 @@ import entities.Time;
 import entities.courses.Class;
 import entities.rooms.Room;
 import utils.Random;
+import utils.StringFormatter;
 import utils.TimeConvert;
 
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
 public class Solver {
     private final CpModel model = new CpModel();
     private final CpSolver solver = new CpSolver();
-    private final SolverConstraint constraint = new SolverConstraint(model);
+    private final ConstraintHandler constraintHandler = new ConstraintHandler(model);
     private IntVar[] room;
     private IntVar[] hour;
     private Literal[][] day;
@@ -64,10 +65,10 @@ public class Solver {
         // [class cannot be overlap]
         for (int i = 0; i < numClasses; i++) {
             for (int j = i + 1; j < numClasses; j++) {
-                Literal diffRoom = constraint.addConstraint(model.addDifferent(room[i], room[j]));
-                Literal diffHour = constraint.addConstraint(model.addDifferent(hour[i], hour[j]));
-                Literal sameDay = constraint.addTimeSlotConstraint(i, j, day);
-                Literal sameWeek = constraint.addTimeSlotConstraint(i, j, week);
+                Literal diffRoom = constraintHandler.addConstraint(model.addDifferent(room[i], room[j]));
+                Literal diffHour = constraintHandler.addConstraint(model.addDifferent(hour[i], hour[j]));
+                Literal sameDay = constraintHandler.addTimeSlotConstraint(i, j, day);
+                Literal sameWeek = constraintHandler.addTimeSlotConstraint(i, j, week);
                 model.addBoolOr(new Literal[]{diffRoom, diffHour, sameDay.not(), sameWeek.not()});
             }
         }
@@ -77,7 +78,7 @@ public class Solver {
             Literal[] c = new Literal[roomList.size()];
             for (int j = 0; j < roomList.size(); j++) {
                 int roomId = Integer.parseInt(roomList.get(j).getId()) - 1;
-                c[j] = constraint.addConstraint(model.addEquality(this.room[i], roomId));
+                c[j] = constraintHandler.addConstraint(model.addEquality(this.room[i], roomId));
             }
             model.addBoolOr(c);
         }
@@ -88,20 +89,20 @@ public class Solver {
             for (int j = 0; j < timeList.size(); j++) {
                 int hour = timeList.get(j).getStart();
                 c[j] = model.newBoolVar(Random.getRandomHexString());
-                Long[] days = convertFromString(timeList.get(j).getDays());
-                Long[] weeks = convertFromString(timeList.get(j).getWeek());
-                Literal sameHour = constraint.addConstraint(model.addEquality(this.hour[i], hour));
+                Long[] days = StringFormatter.convertFromString(timeList.get(j).getDays());
+                Long[] weeks = StringFormatter.convertFromString(timeList.get(j).getWeek());
+                Literal sameHour = constraintHandler.addConstraint(model.addEquality(this.hour[i], hour));
                 Literal[] sameDaySlot = new Literal[numDays];
                 Literal[] sameWeekSlot = new Literal[numWeeks];
                 for (int k = 0; k < numDays; k++) {
-                    sameDaySlot[k] = constraint.addConstraint(model.addEquality(day[i][k], days[k]));
+                    sameDaySlot[k] = constraintHandler.addConstraint(model.addEquality(day[i][k], days[k]));
                 }
-                Literal sameDay = constraint.addConstraint(model.addBoolAnd(sameDaySlot));
+                Literal sameDay = constraintHandler.addConstraint(model.addBoolAnd(sameDaySlot));
                 for (int k = 0; k < numWeeks; k++) {
-                    sameWeekSlot[k] = constraint.addConstraint(model.addEquality(week[i][k], weeks[k]));
+                    sameWeekSlot[k] = constraintHandler.addConstraint(model.addEquality(week[i][k], weeks[k]));
                 }
-                Literal sameWeek = constraint.addConstraint(model.addBoolAnd(sameWeekSlot));
-                c[j] = constraint.addConstraint(model.addBoolAnd(new Literal[]{sameHour, sameDay, sameWeek}));
+                Literal sameWeek = constraintHandler.addConstraint(model.addBoolAnd(sameWeekSlot));
+                c[j] = constraintHandler.addConstraint(model.addBoolAnd(new Literal[]{sameHour, sameDay, sameWeek}));
             }
             model.addBoolOr(c);
         }
@@ -117,14 +118,5 @@ public class Solver {
             System.out.println("No solution found!");
         }
         System.out.println(solver.wallTime());
-    }
-
-
-    public static Long[] convertFromString(String timeSlot) {
-        Long[] result = new Long[timeSlot.length()];
-        for (int i = 0; i < timeSlot.length(); i++) {
-            result[i] = timeSlot.charAt(i) == '1' ? 1L : 0L;
-        }
-        return result;
     }
 }

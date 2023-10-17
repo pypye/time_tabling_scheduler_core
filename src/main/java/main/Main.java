@@ -1,7 +1,7 @@
 package main;
 
 import com.google.ortools.Loader;
-import core.Solver;
+import core.solver.Solver;
 import entities.Problem;
 import utils.DataLoader;
 

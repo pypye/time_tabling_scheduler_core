@@ -1,4 +1,4 @@
-package core;
+package core.solver;
 
 import com.google.ortools.sat.CpSolverSolutionCallback;
 import com.google.ortools.sat.IntVar;

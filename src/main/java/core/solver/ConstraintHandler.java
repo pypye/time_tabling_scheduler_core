@@ -1,17 +1,17 @@
-package core;
+package core.solver;
 
 import com.google.ortools.sat.Constraint;
 import com.google.ortools.sat.CpModel;
 import com.google.ortools.sat.Literal;
 import utils.Random;
 
-public class SolverConstraint {
+public class ConstraintHandler {
     private CpModel model;
 
-    public SolverConstraint() {
+    public ConstraintHandler() {
     }
 
-    public SolverConstraint(CpModel model) {
+    public ConstraintHandler(CpModel model) {
         this.model = model;
     }
 
