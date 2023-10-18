@@ -9,6 +9,9 @@ public class NotOverlap {
     /**
      * <p>Description: No two classes in this constraint can overlap in time.
      * <p>Formula: (c_i.end ≤ c_j.start) ∨ (c_j.end ≤ c_i.start) ∨ ((c_i.days and c_j.days) = 0) ∨ ((c_i.weeks and c_j.weeks) = 0)
+     *
+     * @param i class
+     * @param j class
      */
     public static void add(Class i, Class j) {
         Literal diffTime1 = ConstraintHandler.addConstraint(Factory.getModel().addLessOrEqual(i.end, j.start)); // (c_i.end ≤ c_j.start)

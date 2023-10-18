@@ -4,6 +4,7 @@ import com.google.ortools.sat.CpSolver;
 import com.google.ortools.sat.CpSolverStatus;
 import core.constraints.defaults.SpecificRoom;
 import core.constraints.defaults.SpecificTime;
+import core.constraints.distributions.NotOverlap;
 import entities.Problem;
 import entities.courses.Class;
 import utils.TimeConvert;
