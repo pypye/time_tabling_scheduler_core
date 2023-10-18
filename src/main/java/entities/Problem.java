@@ -71,6 +71,10 @@ public class Problem {
         this.roomList = roomList;
     }
 
+    public int getNumRooms() {
+        return roomList.size();
+    }
+
     public List<Course> getCourseList() {
         return courseList;
     }

@@ -1,5 +1,8 @@
 package entities.courses;
 
+import com.google.ortools.sat.IntVar;
+import com.google.ortools.sat.Literal;
+import core.solver.Factory;
 import entities.Time;
 import entities.rooms.Room;
 import utils.StringFormatter;
@@ -15,6 +18,11 @@ public class Class {
 
     private List<Integer> timePenaltyList;
 
+    public IntVar room = null;
+    public IntVar hour = null;
+    public Literal[] day = null;
+    public Literal[] week = null;
+
     public Class() {
     }
 
@@ -25,6 +33,22 @@ public class Class {
         this.roomsPenaltyList = roomsPenaltyList;
         this.availableTimeList = availableTimeList;
         this.timePenaltyList = timePenaltyList;
+        this.initSolverConstraint();
+    }
+
+    public void initSolverConstraint() {
+        this.room = Factory.getModel().newIntVar(1, Factory.getProblem().getNumRooms(), "room_" + id);
+        this.hour = Factory.getModel().newIntVar(0, Factory.getProblem().getSlotsPerDay(), "hour_" + id);
+        this.day = new Literal[Factory.getProblem().getNrDays()];
+        this.week = new Literal[Factory.getProblem().getNrWeeks()];
+        for (int j = 0; j < Factory.getProblem().getNrDays(); j++) {
+            day[j] = Factory.getModel().newBoolVar("day_" + id + "_slot_" + j);
+        }
+        for (int j = 0; j < Factory.getProblem().getNrWeeks(); j++) {
+            week[j] = Factory.getModel().newBoolVar("week_" + id + "_slot_" + j);
+        }
+        Factory.getModel().addAtLeastOne(day);
+        Factory.getModel().addAtLeastOne(week);
     }
 
     public String getId() {

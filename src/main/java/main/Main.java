@@ -14,9 +14,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        DataLoader dataLoader = new DataLoader("src/main/resources/data/lums-sum17.xml");
-        Problem problem = dataLoader.getProblem();
-        Solver solver = new Solver(problem);
+        Solver solver = new Solver();
         solver.buildModel();
         solver.solve();
     }
