@@ -8,7 +8,15 @@ public class ConstraintHandler {
     private ConstraintHandler() {
     }
 
-    public static Literal addTimeSlotConstraint(Literal[] time_i, Literal[] time_j) {
+    /**
+     * Description: (time_i and time_j) = k.
+     * k = 0: time_i and time_j are not in the same any time slot
+     * k = 1: time_i and time_j are matched one or some time slots
+     * @param time_i time slot of class i. Example: 00010001
+     * @param time_j time slot of class j. Example: 00010010
+     * @return k
+     */
+    public static Literal addTimeSlotConstraintAnd(Literal[] time_i, Literal[] time_j) {
         int numTimes = time_i.length;
         Literal[] sameTimeSlot = new Literal[numTimes];
         for (int k = 0; k < numTimes; k++) {
@@ -24,16 +32,27 @@ public class ConstraintHandler {
         return addConstraint(Factory.getModel().addBoolOr(sameTimeSlot), Factory.getModel().addBoolAnd(negativeTimeSlot));
     }
 
+    /**
+     * Description: Add a constraint to the model.
+     * @param constraint constraint
+     * @return Literal
+     */
     public static Literal addConstraint(Constraint constraint) {
         Literal c = Factory.getModel().newBoolVar(Random.getRandomHexString());
-        constraint.onlyEnforceIf(c);
+        constraint.onlyEnforceIf(c); // c => constraint
         return c;
     }
 
+    /**
+     * Description: Add a constraint to the model.
+     * @param constraintPositive constraint
+     * @param constraintNegative constraint
+     * @return Literal
+     */
     public static Literal addConstraint(Constraint constraintPositive, Constraint constraintNegative) {
         Literal c = Factory.getModel().newBoolVar(Random.getRandomHexString());
-        constraintPositive.onlyEnforceIf(c);
-        constraintNegative.onlyEnforceIf(c.not());
+        constraintPositive.onlyEnforceIf(c); // c => constraintPositive
+        constraintNegative.onlyEnforceIf(c.not()); // not c => constraintNegative
         return c;
     }
 }

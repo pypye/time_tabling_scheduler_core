@@ -19,7 +19,8 @@ public class Class {
     private List<Integer> timePenaltyList;
 
     public IntVar room = null;
-    public IntVar hour = null;
+    public IntVar start = null;
+    public IntVar end = null;
     public Literal[] day = null;
     public Literal[] week = null;
 
@@ -38,7 +39,8 @@ public class Class {
 
     public void initSolverConstraint() {
         this.room = Factory.getModel().newIntVar(1, Factory.getProblem().getNumRooms(), "room_" + id);
-        this.hour = Factory.getModel().newIntVar(0, Factory.getProblem().getSlotsPerDay(), "hour_" + id);
+        this.start = Factory.getModel().newIntVar(0, Factory.getProblem().getSlotsPerDay(), "start_" + id);
+        this.end = Factory.getModel().newIntVar(0, Factory.getProblem().getSlotsPerDay(), "end_" + id);
         this.day = new Literal[Factory.getProblem().getNrDays()];
         this.week = new Literal[Factory.getProblem().getNrWeeks()];
         for (int j = 0; j < Factory.getProblem().getNrDays(); j++) {
@@ -49,6 +51,7 @@ public class Class {
         }
         Factory.getModel().addAtLeastOne(day);
         Factory.getModel().addAtLeastOne(week);
+        Factory.getModel().addLessThan(start, end); // start < end
     }
 
     public String getId() {

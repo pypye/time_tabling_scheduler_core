@@ -29,6 +29,9 @@ public class Time {
     public int getStart() {
         return this.start;
     }
+    public int getEnd() {
+        return this.start + this.length;
+    }
 
     public void setStart(int start) {
         this.start = start;
