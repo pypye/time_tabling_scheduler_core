@@ -13,7 +13,6 @@ public class UnavailableRoom {
     public static void add(Class x, Room y, Time z) {
         Long[] days = StringFormatter.convertFromString(z.getDays());
         Long[] weeks = StringFormatter.convertFromString(z.getWeek());
-
         Literal diffRoom = ConstraintHandler.addConstraint(Factory.getModel().addDifferent(x.room, Integer.parseInt(y.getId()))); // (x.room ≠ y)
         Literal diffTime1 = ConstraintHandler.addConstraint(Factory.getModel().addLessOrEqual(x.end, z.getStart())); // (c_i.end ≤ c_j.start)
         Literal diffTime2 = ConstraintHandler.addConstraint(Factory.getModel().addGreaterThan(x.start, z.getEnd())); // (c_i.start > c_j.end)
