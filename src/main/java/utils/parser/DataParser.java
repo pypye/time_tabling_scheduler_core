@@ -3,6 +3,8 @@ package utils.parser;
 import entities.Problem;
 import entities.Student;
 import entities.Time;
+import entities.courses.Class;
+import entities.rooms.Room;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -27,7 +29,21 @@ public class DataParser {
         problem.setRoomList(RoomsParser.parseRoom(doc.getElementsByTagName("rooms").item(0).getChildNodes()));
         problem.setCourseList(CoursesParser.parseCourse(doc.getElementsByTagName("courses").item(0).getChildNodes()));
         problem.setStudentList(parseStudent(doc.getElementsByTagName("students").item(0).getChildNodes()));
+        matchingRoom(problem);
         return problem;
+    }
+
+    public static void matchingRoom(Problem problem) {
+        for(Class x : problem.getClassList()) {
+            for (Room y : x.getRoomList()) {
+                Room foundRoom = problem.getRoomList().stream().filter(room -> room.getId().equals(y.getId())).findFirst().orElse(null);
+                if (foundRoom != null) {
+                    y.setCapacity(foundRoom.getCapacity());
+                    y.setUnavailableList(foundRoom.getUnavailableList());
+                    y.setTravelList(foundRoom.getTravelList());
+                }
+            }
+        }
     }
 
 

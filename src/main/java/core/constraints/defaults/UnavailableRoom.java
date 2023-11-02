@@ -16,7 +16,7 @@ public class UnavailableRoom {
 
         Literal diffRoom = ConstraintHandler.addConstraint(Factory.getModel().addDifferent(x.room, Integer.parseInt(y.getId()))); // (x.room ≠ y)
         Literal diffTime1 = ConstraintHandler.addConstraint(Factory.getModel().addLessOrEqual(x.end, z.getStart())); // (c_i.end ≤ c_j.start)
-        Literal diffTime2 = ConstraintHandler.addConstraint(Factory.getModel().addGreaterThan(x.start, z.getEnd())); // (c_j.end ≤ c_i.start)
+        Literal diffTime2 = ConstraintHandler.addConstraint(Factory.getModel().addGreaterThan(x.start, z.getEnd())); // (c_i.start > c_j.end)
         Literal diffDay = diffTimeSlot(x.day, days); // (c_i.days and c_j.days) = 0
         Literal diffWeek = diffTimeSlot(x.week, weeks); // (c_i.weeks and c_j.weeks) = 0
         Factory.getModel().addBoolOr(new Literal[]{diffRoom, diffTime1, diffTime2, diffDay, diffWeek});

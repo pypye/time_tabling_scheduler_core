@@ -1,6 +1,6 @@
 package utils.parser;
 
-import entities.Time;
+import core.solver.Factory;
 import entities.rooms.Room;
 import entities.rooms.Travel;
 import org.w3c.dom.Element;
@@ -25,8 +25,12 @@ public class RoomsParser {
                 Element roomElement = (Element) room;
                 Room roomObj = new Room();
                 roomObj.setId(roomElement.getAttribute("id"));
-//                roomObj.setCapacity(Integer.parseInt(roomElement.getAttribute("capacity")));
-//                roomObj.setTravelList(parseTravel(roomElement.getElementsByTagName("travel")));
+                if (roomElement.getAttribute("capacity").isEmpty()) {
+                    roomObj.setCapacity(0);
+                } else {
+                    roomObj.setCapacity(Integer.parseInt(roomElement.getAttribute("capacity")));
+                }
+                roomObj.setTravelList(parseTravel(roomElement.getElementsByTagName("travel")));
                 roomObj.setUnavailableList(parseTime(roomElement.getElementsByTagName("unavailable")));
                 roomArr.add(roomObj);
             }

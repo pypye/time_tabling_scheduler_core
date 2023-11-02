@@ -44,15 +44,15 @@ public class Solver {
         }
         // 2 class can not overlap in time and room
         for (Class x : Factory.getProblem().getClassList()) {
-            for(Class y : Factory.getProblem().getClassList()) {
-                if(x.getId().equals(y.getId())) continue;
+            for (Class y : Factory.getProblem().getClassList()) {
+                if (x.getId().equals(y.getId())) continue;
                 TwoClassNotOverlap.add(x, y);
             }
         }
         // class can not meet in unavailable room
-        for(Class x : Factory.getProblem().getClassList()) {
-            for(Room y : x.getRoomList()) {
-                for(Time z : x.getAvailableTimeList()) {
+        for (Class x : Factory.getProblem().getClassList()) {
+            for (Room y : x.getRoomList()) {
+                for (Time z : y.getUnavailableList()) {
                     UnavailableRoom.add(x, y, z);
                 }
             }
@@ -60,6 +60,7 @@ public class Solver {
     }
 
     public void solve() {
+        System.out.println("Solving...");
         CpSolverStatus status = solver.solve(Factory.getModel());
         if (status == CpSolverStatus.OPTIMAL || status == CpSolverStatus.FEASIBLE) {
             for (Class x : Factory.getProblem().getClassList()) {
