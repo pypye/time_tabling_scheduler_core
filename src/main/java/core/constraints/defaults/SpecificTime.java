@@ -39,7 +39,7 @@ public class SpecificTime {
         Factory.getModel().addBoolOr(c); // F = time_0 ∨ time_1 ∨ ... ∨ time_n
     }
 
-    private static Literal sameTimeSlot(Literal[] time, Long[] matchingTime, int length) {
+    public static Literal sameTimeSlot(Literal[] time, Long[] matchingTime, int length) {
         Literal[] sameTimeSlot = new Literal[length];
         for (int i = 0; i < length; i++) {
             sameTimeSlot[i] = ConstraintHandler.addConstraint(Factory.getModel().addEquality(time[i], matchingTime[i]));

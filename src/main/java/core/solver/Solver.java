@@ -4,9 +4,12 @@ import com.google.ortools.sat.CpSolver;
 import com.google.ortools.sat.CpSolverStatus;
 import core.constraints.defaults.SpecificRoom;
 import core.constraints.defaults.SpecificTime;
-import core.constraints.distributions.NotOverlap;
+import core.constraints.defaults.TwoClassNotOverlap;
+import core.constraints.defaults.UnavailableRoom;
 import entities.Problem;
+import entities.Time;
 import entities.courses.Class;
+import entities.rooms.Room;
 import utils.TimeConvert;
 
 
@@ -30,14 +33,29 @@ public class Solver {
     }
 
     public void buildModel() {
-
+        // init solver constraint
         for (Class x : Factory.getProblem().getClassList()) {
             x.initSolverConstraint();
         }
-        // [class can meet in only specific several room and time]
+        // class can meet in only specific several room and time
         for (Class x : Factory.getProblem().getClassList()) {
             SpecificRoom.add(x);
             SpecificTime.add(x);
+        }
+        // 2 class can not overlap in time and room
+        for (Class x : Factory.getProblem().getClassList()) {
+            for(Class y : Factory.getProblem().getClassList()) {
+                if(x.getId().equals(y.getId())) continue;
+                TwoClassNotOverlap.add(x, y);
+            }
+        }
+        // class can not meet in unavailable room
+        for(Class x : Factory.getProblem().getClassList()) {
+            for(Room y : x.getRoomList()) {
+                for(Time z : x.getAvailableTimeList()) {
+                    UnavailableRoom.add(x, y, z);
+                }
+            }
         }
     }
 

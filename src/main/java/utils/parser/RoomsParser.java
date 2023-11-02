@@ -27,7 +27,7 @@ public class RoomsParser {
                 roomObj.setId(roomElement.getAttribute("id"));
 //                roomObj.setCapacity(Integer.parseInt(roomElement.getAttribute("capacity")));
 //                roomObj.setTravelList(parseTravel(roomElement.getElementsByTagName("travel")));
-//                roomObj.setUnavailableList(parseTime(roomElement.getElementsByTagName("unavailable")));
+                roomObj.setUnavailableList(parseTime(roomElement.getElementsByTagName("unavailable")));
                 roomArr.add(roomObj);
             }
         }

@@ -1,6 +1,7 @@
 package core.solver;
 
 import com.google.ortools.sat.Constraint;
+import com.google.ortools.sat.IntVar;
 import com.google.ortools.sat.Literal;
 import utils.Random;
 
