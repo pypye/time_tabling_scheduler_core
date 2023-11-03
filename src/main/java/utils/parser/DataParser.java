@@ -13,6 +13,8 @@ import org.w3c.dom.NodeList;
 import java.util.ArrayList;
 import java.util.List;
 
+import static utils.UnavailableRoomProcessing.mergeWithDays;
+import static utils.UnavailableRoomProcessing.mergeWithWeeks;
 import static utils.parser.CoursesParser.parseCourse;
 
 public class DataParser {
@@ -29,12 +31,21 @@ public class DataParser {
         problem.setRoomList(RoomsParser.parseRoom(doc.getElementsByTagName("rooms").item(0).getChildNodes()));
         problem.setCourseList(CoursesParser.parseCourse(doc.getElementsByTagName("courses").item(0).getChildNodes()));
         problem.setStudentList(parseStudent(doc.getElementsByTagName("students").item(0).getChildNodes()));
+        mergeUnavailableRoom(problem);
         matchingRoom(problem);
         return problem;
     }
 
+    public static void mergeUnavailableRoom(Problem problem) {
+        for (Room y : problem.getRoomList()) {
+            List<Time> unavailableList1 = mergeWithDays(y.getUnavailableList());
+            List<Time> unavailableList = mergeWithWeeks(unavailableList1);
+            y.setUnavailableList(unavailableList);
+        }
+    }
+
     public static void matchingRoom(Problem problem) {
-        for(Class x : problem.getClassList()) {
+        for (Class x : problem.getClassList()) {
             for (Room y : x.getRoomList()) {
                 Room foundRoom = problem.getRoomList().stream().filter(room -> room.getId().equals(y.getId())).findFirst().orElse(null);
                 if (foundRoom != null) {

@@ -76,6 +76,6 @@ public class Solver {
         } else {
             System.out.println("No solution found!");
         }
-        System.out.println(solver.wallTime());
+        System.out.println("Solve time: " + solver.wallTime());
     }
 }
