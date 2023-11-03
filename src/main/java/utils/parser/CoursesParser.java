@@ -73,7 +73,9 @@ public class CoursesParser {
                 Element classElement = (Element) classNode;
                 Class classObj = new Class();
                 classObj.setId(classElement.getAttribute("id"));
-                classObj.setLimit(Integer.parseInt(classElement.getAttribute("limit")));
+                if (classElement.hasAttribute("limit")) {
+                    classObj.setLimit(Integer.parseInt(classElement.getAttribute("limit")));
+                }
                 classObj.setRoomList(parseRoom(classElement.getElementsByTagName("room")));
                 classObj.setAvailableTimeList(parseTime(classElement.getElementsByTagName("time")));
                 classArr.add(classObj);

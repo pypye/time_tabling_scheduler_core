@@ -1,5 +1,6 @@
 package utils.parser;
 
+import entities.Distribution;
 import entities.Problem;
 import entities.Student;
 import entities.Time;
@@ -16,6 +17,7 @@ import java.util.List;
 import static utils.UnavailableRoomProcessing.mergeWithDays;
 import static utils.UnavailableRoomProcessing.mergeWithWeeks;
 import static utils.parser.CoursesParser.parseCourse;
+import static utils.parser.DistributionsParser.parseDistribution;
 
 public class DataParser {
     public DataParser() {
@@ -31,6 +33,7 @@ public class DataParser {
         problem.setRoomList(RoomsParser.parseRoom(doc.getElementsByTagName("rooms").item(0).getChildNodes()));
         problem.setCourseList(CoursesParser.parseCourse(doc.getElementsByTagName("courses").item(0).getChildNodes()));
         problem.setStudentList(parseStudent(doc.getElementsByTagName("students").item(0).getChildNodes()));
+        problem.setDistributionList(parseDistribution(doc.getElementsByTagName("distributions").item(0).getChildNodes()));
         mergeUnavailableRoom(problem);
         matchingRoom(problem);
         return problem;

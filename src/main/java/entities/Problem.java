@@ -18,10 +18,12 @@ public class Problem {
     private List<Course> courseList;
     private List<Student> studentList;
 
+    private List<Distribution> distributionList;
+
     public Problem() {
     }
 
-    public Problem(String name, int nrDays, int slotsPerDay, int nrWeeks, List<Room> roomList, List<Course> courseList, List<Student> studentList) {
+    public Problem(String name, int nrDays, int slotsPerDay, int nrWeeks, List<Room> roomList, List<Course> courseList, List<Student> studentList, List<Distribution> distributionList) {
         this.name = name;
         this.nrDays = nrDays;
         this.slotsPerDay = slotsPerDay;
@@ -29,6 +31,7 @@ public class Problem {
         this.roomList = roomList;
         this.courseList = courseList;
         this.studentList = studentList;
+        this.distributionList = distributionList;
     }
 
     public String getName() {
@@ -101,6 +104,14 @@ public class Problem {
                 .flatMap(subpart -> subpart.getClassList().stream())
                 .forEach(classList::add);
         return classList;
+    }
+
+    public List<Distribution> getDistributionList() {
+        return distributionList;
+    }
+
+    public void setDistributionList(List<Distribution> distributionList) {
+        this.distributionList = distributionList;
     }
 
     @Override

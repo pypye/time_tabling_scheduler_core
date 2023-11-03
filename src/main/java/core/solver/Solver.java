@@ -6,6 +6,8 @@ import core.constraints.defaults.SpecificRoom;
 import core.constraints.defaults.SpecificTime;
 import core.constraints.defaults.TwoClassNotOverlap;
 import core.constraints.defaults.UnavailableRoom;
+import core.constraints.distributions.*;
+import entities.Distribution;
 import entities.Time;
 import entities.courses.Class;
 import entities.rooms.Room;
@@ -44,10 +46,9 @@ public class Solver {
             SpecificTime.add(x);
         }
         // 2 class can not overlap in time and room
-        for (Class x : Factory.getProblem().getClassList()) {
-            for (Class y : Factory.getProblem().getClassList()) {
-                if (x.getId().equals(y.getId())) continue;
-                TwoClassNotOverlap.add(x, y);
+        for (int i = 0; i < Factory.getProblem().getClassList().size(); i++) {
+            for (int j = i + 1; j < Factory.getProblem().getClassList().size(); j++) {
+                TwoClassNotOverlap.add(Factory.getProblem().getClassList().get(i), Factory.getProblem().getClassList().get(j));
             }
         }
         // class can not meet in unavailable room
@@ -58,7 +59,62 @@ public class Solver {
                 }
             }
         }
+        // add distribution constraint
+        for (Distribution d : Factory.getProblem().getDistributionList()) {
+            for (int i = 0; i < d.getClassList().size()-1; i++) {
+                for (int j = i + 1; j < d.getClassList().size(); j++) {
+                    Class x = Factory.getProblem().getClassList().get(Integer.parseInt(d.getClassList().get(i).getId()) - 1);
+                    Class y = Factory.getProblem().getClassList().get(Integer.parseInt(d.getClassList().get(j).getId()) - 1);
+                    addDistributionConstraint(d.getType(), x, y);
+                }
+            }
+        }
     }
+
+    //pass func as param
+    public void addDistributionConstraint(String type, Class x, Class y) {
+        switch (type) {
+            case "SameStart":
+                SameStart.add(x, y);
+                break;
+            case "SameTime":
+                SameTime.add(x, y);
+                break;
+            case "DifferentTime":
+                DifferentTime.add(x, y);
+                break;
+            case "SameDays":
+                SameDays.add(x, y);
+                break;
+            case "DifferentDays":
+                DifferentDays.add(x, y);
+                break;
+            case "SameWeeks":
+                SameWeeks.add(x, y);
+                break;
+            case "DifferentWeeks":
+                DifferentWeeks.add(x, y);
+                break;
+            case "Overlap":
+                Overlap.add(x, y);
+                break;
+            case "NotOverlap":
+                NotOverlap.add(x, y);
+                break;
+            case "SameRoom":
+                SameRoom.add(x, y);
+                break;
+            case "DifferentRoom":
+                DifferentRoom.add(x, y);
+                break;
+            case "SameAttendees":
+                SameAttendees.add(x, y);
+                break;
+            default:
+                System.out.println("Distribution type not implemented: " + type);
+        }
+    }
+
 
     public void solve() {
         System.out.println("Solving...");

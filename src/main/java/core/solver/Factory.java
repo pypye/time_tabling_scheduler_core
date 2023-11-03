@@ -20,7 +20,7 @@ public class Factory {
 
     public static Problem getProblem() {
         if (problem == null) {
-            DataLoader dataLoader = new DataLoader("src/main/resources/data/bet-sum18.xml");
+            DataLoader dataLoader = new DataLoader("src/main/resources/data/wbg-fal10.xml");
             problem = dataLoader.getProblem();
         }
         return problem;
