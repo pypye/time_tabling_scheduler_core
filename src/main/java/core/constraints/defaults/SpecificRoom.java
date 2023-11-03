@@ -16,6 +16,9 @@ public class SpecificRoom {
      * @param x Class
      */
     public static void add(Class x) {
+        if(x.getRoomList().isEmpty()) {
+            return;
+        }
         List<Room> roomList = x.getRoomList();
         Literal[] c = new Literal[roomList.size()];
         for (int j = 0; j < roomList.size(); j++) {

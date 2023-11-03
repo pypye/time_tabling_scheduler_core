@@ -8,6 +8,9 @@ import entities.courses.Class;
 public class TwoClassNotOverlap {
 
     public static void add(Class i, Class j) {
+        if (i.room == null || j.room == null) {
+            return;
+        }
         Literal diffRoom = ConstraintHandler.addConstraint(Factory.getModel().addDifferent(i.room, j.room)); // (c_i.room ≠ c_j.room)
         Literal diffTime1 = ConstraintHandler.addConstraint(Factory.getModel().addLessOrEqual(i.end, j.start)); // (c_i.end ≤ c_j.start)
         Literal diffTime2 = ConstraintHandler.addConstraint(Factory.getModel().addLessOrEqual(j.end, i.start)); // (c_j.end ≤ c_i.start)

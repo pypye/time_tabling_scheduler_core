@@ -38,7 +38,9 @@ public class Class {
     }
 
     public void initSolverConstraint() {
-        this.room = Factory.getModel().newIntVar(1, Factory.getProblem().getNumRooms(), "room_" + id);
+        if(!this.roomList.isEmpty()) {
+            this.room = Factory.getModel().newIntVar(1, Factory.getProblem().getNumRooms(), "room_" + id);
+        }
         this.start = Factory.getModel().newIntVar(0, Factory.getProblem().getSlotsPerDay(), "start_" + id);
         this.end = Factory.getModel().newIntVar(0, Factory.getProblem().getSlotsPerDay(), "end_" + id);
         this.day = new Literal[Factory.getProblem().getNrDays()];

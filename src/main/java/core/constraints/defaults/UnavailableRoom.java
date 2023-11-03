@@ -11,6 +11,9 @@ import utils.StringFormatter;
 public class UnavailableRoom {
 
     public static void add(Class x, Room y, Time z) {
+        if (x.room == null) {
+            return;
+        }
         Long[] days = StringFormatter.convertFromString(z.getDays());
         Long[] weeks = StringFormatter.convertFromString(z.getWeek());
         Literal diffRoom = ConstraintHandler.addConstraint(Factory.getModel().addDifferent(x.room, Integer.parseInt(y.getId()))); // (x.room ≠ y)
