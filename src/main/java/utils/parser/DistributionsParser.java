@@ -21,6 +21,11 @@ public class DistributionsParser {
                 Distribution distributionObj = new Distribution();
                 distributionObj.setType(distributionElement.getAttribute("type"));
                 distributionObj.setClassList(parseClass(distributionElement.getElementsByTagName("class")));
+                if (distributionElement.getAttribute("required").equals("true")) {
+                    distributionObj.setRequired(true);
+                } else {
+                    distributionObj.setRequired(false);
+                }
                 distributionArr.add(distributionObj);
             }
         }

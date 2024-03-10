@@ -12,11 +12,6 @@ public class Student {
     public Student() {
     }
 
-    public Student(String id, List<Course> courseList) {
-        this.id = id;
-        this.courseList = courseList;
-    }
-
     public String getId() {
         return id;
     }

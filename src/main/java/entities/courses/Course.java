@@ -10,10 +10,6 @@ public class Course {
     public Course() {
     }
 
-    public Course(List<Config> configList) {
-        this.configList = configList;
-    }
-
     public List<Config> getConfigList() {
         return configList;
     }

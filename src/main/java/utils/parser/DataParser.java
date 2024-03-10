@@ -1,6 +1,5 @@
 package utils.parser;
 
-import entities.Distribution;
 import entities.Problem;
 import entities.Student;
 import entities.Time;
@@ -41,8 +40,8 @@ public class DataParser {
 
     public static void mergeUnavailableRoom(Problem problem) {
         for (Room y : problem.getRoomList()) {
-            List<Time> unavailableList1 = mergeWithDays(y.getUnavailableList());
-            List<Time> unavailableList = mergeWithWeeks(unavailableList1);
+            List<Time> unavailableList = mergeWithDays(y.getUnavailableList());
+            unavailableList = mergeWithWeeks(unavailableList);
             y.setUnavailableList(unavailableList);
         }
     }
@@ -89,6 +88,11 @@ public class DataParser {
                 timeObj.setLength(Integer.parseInt(timeElement.getAttribute("length")));
                 timeObj.setWeek(timeElement.getAttribute("weeks"));
                 timeObj.setDays(timeElement.getAttribute("days"));
+                if (timeElement.getAttribute("penalty").isEmpty()) {
+                    timeObj.setPenalty(0);
+                } else {
+                    timeObj.setPenalty(Integer.parseInt(timeElement.getAttribute("penalty")));
+                }
                 timeArr.add(timeObj);
             }
         }

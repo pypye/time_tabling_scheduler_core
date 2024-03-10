@@ -9,11 +9,6 @@ public class Travel {
     public Travel() {
     }
 
-    public Travel(String room, int value) {
-        this.room = room;
-        this.value = value;
-    }
-
     public String getRoom() {
         return this.room;
     }

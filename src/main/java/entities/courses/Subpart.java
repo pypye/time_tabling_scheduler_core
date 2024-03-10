@@ -10,10 +10,6 @@ public class Subpart {
     public Subpart() {
     }
 
-    public Subpart(List<Class> classList) {
-        this.classList = classList;
-    }
-
     public List<Class> getClassList() {
         return classList;
     }

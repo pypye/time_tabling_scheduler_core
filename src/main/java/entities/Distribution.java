@@ -9,12 +9,9 @@ public class Distribution {
 
     private List<Class> classList;
 
-    public Distribution() {
-    }
+    private boolean required;
 
-    public Distribution(String type, List<Class> classList) {
-        this.type = type;
-        this.classList = classList;
+    public Distribution() {
     }
 
     public String getType() {
@@ -31,5 +28,13 @@ public class Distribution {
 
     public void setClassList(List<Class> classList) {
         this.classList = classList;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
     }
 }

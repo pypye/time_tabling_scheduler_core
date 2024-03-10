@@ -1,30 +1,36 @@
 package core.constraints.distributions;
 
-import com.google.ortools.sat.LinearExpr;
-import com.google.ortools.sat.LinearExprBuilder;
-import com.google.ortools.sat.Literal;
-import core.solver.ConstraintHandler;
 import core.solver.Factory;
-import entities.courses.Class;
+import entities.Time;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class MaxDays {
 
-    public void add(int day) {
-        List<Class> classList = Factory.getProblem().getClassList();
-        Literal[] dayLiterals = new Literal[Factory.getProblem().getNrDays()];
-        for (int i = 0; i < Factory.getProblem().getNrDays(); i++) {
-            Literal[] time_j = new Literal[classList.size()];
-            for (int k = 0; k < classList.size(); k++) {
-                time_j[k] = classList.get(k).day[i];
-            }
-            dayLiterals[i] = ConstraintHandler.addConstraint(
-                Factory.getModel().addBoolOr(time_j)
-            );
+    public static boolean compare(ArrayList<Time> times, int D) {
+        // countNonzeroBits(C1.days or C2.days or ⋅ ⋅ ⋅ Cn.days) ≤ D
+        int count = 0;
+        StringBuilder orResult = new StringBuilder();
+        orResult.append("0".repeat(Math.max(0, Factory.getProblem().getNrDays())));
+        for (Time time : times) {
+            orResult = new StringBuilder(orDays(orResult.toString(), time.getDays()));
         }
-        LinearExprBuilder countBits = LinearExpr.newBuilder().addSum(dayLiterals);
-        Factory.getModel().addLessOrEqual(countBits.build(), day); // countBits <= day
 
+        for (int x = 0; x < Factory.getProblem().getNrDays(); x++) {
+            if (orResult.charAt(x) == '1') {
+                count++;
+            }
+        }
+        return count <= D;
+    }
+
+    private static String orDays(String i, String j) {
+        StringBuilder orResult = new StringBuilder();
+        for (int x = 0; x < Factory.getProblem().getNrDays(); x++) {
+            int temp_i = i.charAt(x) - '0';
+            int temp_j = j.charAt(x) - '0';
+            orResult.append((temp_i | temp_j) + '0');
+        }
+        return orResult.toString();
     }
 }

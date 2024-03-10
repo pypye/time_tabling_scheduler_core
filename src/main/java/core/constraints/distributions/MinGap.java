@@ -1,20 +1,30 @@
 package core.constraints.distributions;
 
-import com.google.ortools.sat.LinearExpr;
-import com.google.ortools.sat.LinearExprBuilder;
 import com.google.ortools.sat.Literal;
-import core.solver.ConstraintHandler;
 import core.solver.Factory;
+import entities.Time;
 import entities.courses.Class;
 
 public class MinGap {
-    public static void add(Class i, Class j, int gap) {
-        Literal diffDay = ConstraintHandler.addTimeSlotConstraintAnd(i.day, j.day).not(); // (c_i.days and c_j.days) = 0
-        Literal diffWeek = ConstraintHandler.addTimeSlotConstraintAnd(i.week, j.week).not(); // (c_i.weeks and c_j.weeks) = 0
-        LinearExprBuilder endAndGap1 = LinearExpr.newBuilder().add(i.end).add(gap);
-        Literal minGap1 = ConstraintHandler.addConstraint(Factory.getModel().addLessOrEqual(endAndGap1.build(), j.start)); // (c_i.end + gap ≤ c_j.start)
-        LinearExprBuilder endAndGap2 = LinearExpr.newBuilder().add(j.end).add(gap);
-        Literal minGap2 = ConstraintHandler.addConstraint(Factory.getModel().addLessOrEqual(endAndGap2.build(), i.start)); // (c_j.end + gap ≤ c_i.start)
-        Factory.getModel().addBoolOr(new Literal[]{diffDay, diffWeek, minGap1, minGap2});
+    public static boolean compare(Time i, Time j, int G) {
+        // ((Ci.days and Cj.days) = 0) ∨ ((Ci.weeks and Cj.weeks) = 0) ∨ (Ci.end + G ≤ Cj.start) ∨ (Cj.end + G ≤ Ci.start)
+        return DifferentDays.compare(i, j)
+            || DifferentWeeks.compare(i, j)
+            || i.getEnd() + G <= j.getStart()
+            || j.getEnd() + G <= i.getStart();
+    }
+
+    public static void add(Class i, Class j, int G) {
+        for (int k = 0; k < i.getAvailableTimeList().size(); k++) {
+            Time t1 = i.getAvailableTimeList().get(k);
+            for (int l = 0; l < j.getAvailableTimeList().size(); l++) {
+                Time t2 = j.getAvailableTimeList().get(l);
+                if (!MinGap.compare(t1, t2, G)) {
+                    Factory.getModel().addBoolOr(new Literal[]{
+                        i.time[k].not(), j.time[l].not()
+                    });
+                }
+            }
+        }
     }
 }

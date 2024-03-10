@@ -1,6 +1,5 @@
 package utils.parser;
 
-import core.solver.Factory;
 import entities.rooms.Room;
 import entities.rooms.Travel;
 import org.w3c.dom.Element;
@@ -32,6 +31,11 @@ public class RoomsParser {
                 }
                 roomObj.setTravelList(parseTravel(roomElement.getElementsByTagName("travel")));
                 roomObj.setUnavailableList(parseTime(roomElement.getElementsByTagName("unavailable")));
+                if (roomElement.getAttribute("penalty").isEmpty()) {
+                    roomObj.setPenalty(0);
+                } else {
+                    roomObj.setPenalty(Integer.parseInt(roomElement.getAttribute("penalty")));
+                }
                 roomArr.add(roomObj);
             }
         }

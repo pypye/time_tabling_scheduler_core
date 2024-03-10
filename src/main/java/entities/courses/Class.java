@@ -1,6 +1,7 @@
 package entities.courses;
 
 import com.google.ortools.sat.IntVar;
+import com.google.ortools.sat.LinearExpr;
 import com.google.ortools.sat.Literal;
 import core.solver.Factory;
 import entities.Time;
@@ -13,47 +14,50 @@ public class Class {
     private String id;
     private int limit;
     private List<Room> roomList;
-    private List<Integer> roomsPenaltyList;
     private List<Time> availableTimeList;
 
-    private List<Integer> timePenaltyList;
-
-    public IntVar room = null;
-    public IntVar start = null;
-    public IntVar end = null;
-    public Literal[] day = null;
-    public Literal[] week = null;
+    public Literal[] room = null;
+    public Literal[] time = null;
+    public IntVar[] penaltyRoom = null;
+    public IntVar[] penaltyTime = null;
 
     public Class() {
     }
 
-    public Class(String id, int limit, List<Room> roomList, List<Integer> roomsPenaltyList, List<Time> availableTimeList, List<Integer> timePenaltyList) {
-        this.id = id;
-        this.limit = limit;
-        this.roomList = roomList;
-        this.roomsPenaltyList = roomsPenaltyList;
-        this.availableTimeList = availableTimeList;
-        this.timePenaltyList = timePenaltyList;
-        this.initSolverConstraint();
-    }
-
     public void initSolverConstraint() {
-        if(!this.roomList.isEmpty()) {
-            this.room = Factory.getModel().newIntVar(1, Factory.getProblem().getNumRooms(), "room_" + id);
+        if (!this.roomList.isEmpty()) {
+            this.room = new Literal[this.roomList.size()];
+            this.penaltyRoom = new IntVar[this.roomList.size()];
+            for (int i = 0; i < this.roomList.size(); i++) {
+                this.room[i] = Factory.getModel().newBoolVar("class_" + id + "_room_" + i);
+                this.penaltyRoom[i] = Factory.getModel().newIntVar(0, 100, "class_" + id + "_penalty_room_" + i);
+            }
         }
-        this.start = Factory.getModel().newIntVar(0, Factory.getProblem().getSlotsPerDay(), "start_" + id);
-        this.end = Factory.getModel().newIntVar(0, Factory.getProblem().getSlotsPerDay(), "end_" + id);
-        this.day = new Literal[Factory.getProblem().getNrDays()];
-        this.week = new Literal[Factory.getProblem().getNrWeeks()];
-        for (int j = 0; j < Factory.getProblem().getNrDays(); j++) {
-            day[j] = Factory.getModel().newBoolVar("day_" + id + "_slot_" + j);
+        this.time = new Literal[this.availableTimeList.size()];
+        this.penaltyTime = new IntVar[this.availableTimeList.size()];
+        for (int i = 0; i < this.availableTimeList.size(); i++) {
+            this.time[i] = Factory.getModel().newBoolVar("class_" + id + "_time_" + i);
+            this.penaltyTime[i] = Factory.getModel().newIntVar(0, 100, "class_" + id + "_penalty_time_" + i);
         }
-        for (int j = 0; j < Factory.getProblem().getNrWeeks(); j++) {
-            week[j] = Factory.getModel().newBoolVar("week_" + id + "_slot_" + j);
+        // class can meet in only specific several room and time and add penalty if not
+        if (!this.roomList.isEmpty()) {
+            Factory.getModel().addAtLeastOne(this.room);
+            for(int i = 0; i < this.roomList.size(); i++) {
+                Factory.getModel().addEquality(penaltyRoom[i], this.roomList.get(i).getPenalty()).onlyEnforceIf(room[i]);
+                Factory.getModel().addEquality(penaltyRoom[i], 0).onlyEnforceIf(room[i].not());
+            }
+            LinearExpr penaltyRoomExpr = LinearExpr.sum(this.penaltyRoom);
+            Factory.getModel().minimize(penaltyRoomExpr);
         }
-        Factory.getModel().addAtLeastOne(day);
-        Factory.getModel().addAtLeastOne(week);
-        Factory.getModel().addLessThan(start, end); // start < end
+        if (!this.availableTimeList.isEmpty()) {
+            Factory.getModel().addAtLeastOne(this.time);
+            for(int i = 0; i < this.availableTimeList.size(); i++) {
+                Factory.getModel().addEquality(penaltyTime[i], this.availableTimeList.get(i).getPenalty()).onlyEnforceIf(time[i]);
+                Factory.getModel().addEquality(penaltyTime[i], 0).onlyEnforceIf(time[i].not());
+            }
+            LinearExpr penaltyTimeExpr = LinearExpr.sum(this.penaltyTime);
+            Factory.getModel().minimize(penaltyTimeExpr);
+        }
     }
 
     public String getId() {
@@ -80,28 +84,12 @@ public class Class {
         this.roomList = roomList;
     }
 
-    public List<Integer> getRoomsPenaltyList() {
-        return roomsPenaltyList;
-    }
-
-    public void setRoomsPenaltyList(List<Integer> roomsPenaltyList) {
-        this.roomsPenaltyList = roomsPenaltyList;
-    }
-
     public List<Time> getAvailableTimeList() {
         return availableTimeList;
     }
 
     public void setAvailableTimeList(List<Time> availableTimeList) {
         this.availableTimeList = availableTimeList;
-    }
-
-    public List<Integer> getTimePenaltyList() {
-        return timePenaltyList;
-    }
-
-    public void setTimePenaltyList(List<Integer> timePenaltyList) {
-        this.timePenaltyList = timePenaltyList;
     }
 
     @Override

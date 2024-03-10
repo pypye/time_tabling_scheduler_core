@@ -1,22 +1,50 @@
 package core.constraints.distributions;
 
 import com.google.ortools.sat.Literal;
-import core.solver.ConstraintHandler;
+import core.constraints.utils.Utils;
 import core.solver.Factory;
+import entities.Time;
 import entities.courses.Class;
 
 public class Overlap {
-    /**
-     * <p>Description: Any two classes in this constraint must have some overlap in time.
-     * <p>Formula: (c_j.start < c_i.end) ∧ (c_i.start < c_j.end) ∧ ((c_i.days and c_j.days) ≠ 0) ∧ ((c_i.weeks and c_j.weeks) ≠ 0)
-     * @param i class
-     * @param j class
-     */
+    public static boolean compare(Time i, Time j) {
+        // (Cj.start < Ci.end) ∧ (Ci.start < Cj.end) ∧ ((Ci.days and Cj.days) ≠ 0) ∧ ((Ci.weeks and Cj.weeks) ≠ 0)
+        return j.getStart() < i.getEnd() && i.getStart() < j.getEnd() && getOverlapDays(i, j) && getOverlapWeeks(i, j);
+    }
+
+    public static boolean getOverlapWeeks(Time i, Time j) {
+        // (Ci.weeks and Cj.weeks) ≠ 0
+        String andResult = Utils.andWeeks(i, j);
+        for (int x = 0; x < Factory.getProblem().getNrWeeks(); x++) {
+            if (andResult.charAt(x) == '1') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean getOverlapDays(Time i, Time j) {
+        // (Ci.days and Cj.days) ≠ 0
+        String andResult = Utils.andDays(i, j);
+        for (int x = 0; x < Factory.getProblem().getNrDays(); x++) {
+            if (andResult.charAt(x) == '1') {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void add(Class i, Class j) {
-        Literal overlapTime1 = ConstraintHandler.addConstraint(Factory.getModel().addLessThan(j.start, i.end)); // (c_j.start < c_i.end)
-        Literal overlapTime2 = ConstraintHandler.addConstraint(Factory.getModel().addLessThan(i.start, j.end)); // (c_i.start < c_j.end)
-        Literal overlapDay = ConstraintHandler.addTimeSlotConstraintAnd(i.day, j.day); // (c_i.days and c_j.days) ≠ 0)
-        Literal overlapWeek = ConstraintHandler.addTimeSlotConstraintAnd(i.week, j.week); // (c_i.weeks and c_j.weeks) ≠ 0)
-        Factory.getModel().addBoolAnd(new Literal[]{overlapTime1, overlapTime2, overlapDay, overlapWeek});
+        for (int k = 0; k < i.getAvailableTimeList().size(); k++) {
+            Time t1 = i.getAvailableTimeList().get(k);
+            for (int l = 0; l < j.getAvailableTimeList().size(); l++) {
+                Time t2 = j.getAvailableTimeList().get(l);
+                if (!Overlap.compare(t1, t2)) {
+                    Factory.getModel().addBoolOr(new Literal[]{
+                        i.time[k].not(), j.time[l].not()
+                    });
+                }
+            }
+        }
     }
 }

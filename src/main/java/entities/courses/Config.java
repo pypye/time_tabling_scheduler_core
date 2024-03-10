@@ -10,10 +10,6 @@ public class Config {
     public Config() {
     }
 
-    public Config(List<Subpart> subpartList) {
-        this.subpartList = subpartList;
-    }
-
     public List<Subpart> getSubpartList() {
         return subpartList;
     }

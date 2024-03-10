@@ -1,10 +1,9 @@
 package entities.rooms;
 
 import entities.Time;
+import utils.StringFormatter;
 
 import java.util.List;
-
-import utils.StringFormatter;
 
 public class Room {
     private String id;
@@ -12,14 +11,9 @@ public class Room {
     private List<Travel> travelList;
     private List<Time> unavailableList;
 
-    public Room() {
-    }
+    private int penalty;
 
-    public Room(String id, int capacity, List<Travel> travelList, List<Time> unavailableList) {
-        this.id = id;
-        this.capacity = capacity;
-        this.travelList = travelList;
-        this.unavailableList = unavailableList;
+    public Room() {
     }
 
     public String getId() {
@@ -52,6 +46,14 @@ public class Room {
 
     public void setUnavailableList(List<Time> unavailableList) {
         this.unavailableList = unavailableList;
+    }
+
+    public int getPenalty() {
+        return this.penalty;
+    }
+
+    public void setPenalty(int penalty) {
+        this.penalty = penalty;
     }
 
     @Override

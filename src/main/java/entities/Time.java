@@ -8,14 +8,9 @@ public class Time {
     private int length;
     private String week;
 
-    public Time() {
-    }
+    private int penalty;
 
-    public Time(String days, int start, int length, String week) {
-        this.days = days;
-        this.start = start;
-        this.length = length;
-        this.week = week;
+    public Time() {
     }
 
     public String getDays() {
@@ -29,6 +24,7 @@ public class Time {
     public int getStart() {
         return this.start;
     }
+
     public int getEnd() {
         return this.start + this.length;
     }
@@ -53,8 +49,23 @@ public class Time {
         this.week = week;
     }
 
+    public int getPenalty() {
+        return this.penalty;
+    }
+
+    public void setPenalty(int penalty) {
+        this.penalty = penalty;
+    }
+
     @Override
     public String toString() {
         return StringFormatter.printObject(this);
+    }
+
+    public boolean getEquals(Time obj) {
+        return this.getStart() == obj.getStart()
+            && this.getEnd() == obj.getEnd()
+            && this.getDays().equals(obj.getDays())
+            && this.getWeek().equals(obj.getWeek());
     }
 }

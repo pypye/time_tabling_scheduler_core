@@ -23,17 +23,6 @@ public class Problem {
     public Problem() {
     }
 
-    public Problem(String name, int nrDays, int slotsPerDay, int nrWeeks, List<Room> roomList, List<Course> courseList, List<Student> studentList, List<Distribution> distributionList) {
-        this.name = name;
-        this.nrDays = nrDays;
-        this.slotsPerDay = slotsPerDay;
-        this.nrWeeks = nrWeeks;
-        this.roomList = roomList;
-        this.courseList = courseList;
-        this.studentList = studentList;
-        this.distributionList = distributionList;
-    }
-
     public String getName() {
         return name;
     }

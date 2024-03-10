@@ -20,7 +20,9 @@ public class Factory {
 
     public static Problem getProblem() {
         if (problem == null) {
+            System.out.println("Loading problem from file");
             DataLoader dataLoader = new DataLoader("src/main/resources/data/wbg-fal10.xml");
+            System.out.println("Problem loaded");
             problem = dataLoader.getProblem();
         }
         return problem;
