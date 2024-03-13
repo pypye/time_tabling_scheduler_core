@@ -60,4 +60,20 @@ public class Room {
     public String toString() {
         return StringFormatter.printObject(this);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof Room room)) {
+            return false;
+        }
+        return id.equals(room.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.parseInt(id);
+    }
 }

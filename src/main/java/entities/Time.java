@@ -62,10 +62,27 @@ public class Time {
         return StringFormatter.printObject(this);
     }
 
-    public boolean getEquals(Time obj) {
-        return this.getStart() == obj.getStart()
-            && this.getEnd() == obj.getEnd()
-            && this.getDays().equals(obj.getDays())
-            && this.getWeek().equals(obj.getWeek());
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof Time time)) {
+            return false;
+        }
+        return this.getStart() == time.getStart()
+            && this.getEnd() == time.getEnd()
+            && this.getDays().equals(time.getDays())
+            && this.getWeek().equals(time.getWeek());
     }
+
+    @Override
+    public int hashCode() {
+        int result = days != null ? days.hashCode() : 0;
+        result = 31 * result + start;
+        result = 31 * result + length;
+        result = 31 * result + (week != null ? week.hashCode() : 0);
+        return result;
+    }
+
 }

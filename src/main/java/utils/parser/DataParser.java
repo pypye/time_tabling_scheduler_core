@@ -1,5 +1,6 @@
 package utils.parser;
 
+import entities.Distribution;
 import entities.Problem;
 import entities.Student;
 import entities.Time;
@@ -58,7 +59,6 @@ public class DataParser {
             }
         }
     }
-
 
     public static List<Student> parseStudent(NodeList studentList) {
         ArrayList<Student> studentArr = new ArrayList<>();

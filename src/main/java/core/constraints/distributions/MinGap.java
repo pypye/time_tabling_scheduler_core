@@ -13,18 +13,4 @@ public class MinGap {
             || i.getEnd() + G <= j.getStart()
             || j.getEnd() + G <= i.getStart();
     }
-
-    public static void add(Class i, Class j, int G) {
-        for (int k = 0; k < i.getAvailableTimeList().size(); k++) {
-            Time t1 = i.getAvailableTimeList().get(k);
-            for (int l = 0; l < j.getAvailableTimeList().size(); l++) {
-                Time t2 = j.getAvailableTimeList().get(l);
-                if (!MinGap.compare(t1, t2, G)) {
-                    Factory.getModel().addBoolOr(new Literal[]{
-                        i.time[k].not(), j.time[l].not()
-                    });
-                }
-            }
-        }
-    }
 }

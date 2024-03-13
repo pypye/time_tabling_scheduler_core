@@ -12,18 +12,4 @@ public class WorkDay {
             || DifferentWeeks.compare(i, j)
             || Math.max(i.getEnd(), j.getEnd()) - Math.min(i.getStart(), j.getStart()) <= S;
     }
-
-    public static void add(Class i, Class j, int S) {
-        for (int k = 0; k < i.getAvailableTimeList().size(); k++) {
-            Time t1 = i.getAvailableTimeList().get(k);
-            for (int l = 0; l < j.getAvailableTimeList().size(); l++) {
-                Time t2 = j.getAvailableTimeList().get(l);
-                if (!WorkDay.compare(t1, t2, S)) {
-                    Factory.getModel().addBoolOr(new Literal[]{
-                        i.time[k].not(), j.time[l].not()
-                    });
-                }
-            }
-        }
-    }
 }

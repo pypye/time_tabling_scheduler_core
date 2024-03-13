@@ -1,16 +1,19 @@
-package core.constraints.distributions;
+package core.constraints.defaults;
 
+import core.constraints.distributions.Overlap;
+import core.constraints.distributions.SameAttendees;
+import core.constraints.distributions.SameRoom;
 import entities.Placement;
 import entities.Time;
 import entities.courses.Class;
+import entities.rooms.Room;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SameStart {
-    public static boolean compare(Time i, Time j) {
-        // Ci.start = Cj.start
-        return i.getStart() == j.getStart();
+public class TwoClassOverlap {
+    public static boolean compare(Room r_i, Room r_j, Time t_i, Time t_j) {
+        return SameRoom.compare(r_i, r_j) && Overlap.compare(t_i, t_j);
     }
 
     public static void remove(Class i, Class j) {
@@ -21,7 +24,7 @@ public class SameStart {
         for (Placement p : i.placements) {
             boolean keep = false;
             for (Placement q : j.placements) {
-                if (SameStart.compare(p.getTime(), q.getTime())) {
+                if (TwoClassOverlap.compare(p.getRoom(), q.getRoom(), p.getTime(), q.getTime())) {
                     keep = true;
                     break;
                 }

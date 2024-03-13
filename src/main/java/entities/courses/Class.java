@@ -1,14 +1,16 @@
 package entities.courses;
 
-import com.google.ortools.sat.IntVar;
-import com.google.ortools.sat.LinearExpr;
 import com.google.ortools.sat.Literal;
+import core.constraints.distributions.NotOverlap;
+import core.constraints.distributions.Overlap;
+import core.constraints.distributions.SameAttendees;
 import core.solver.Factory;
+import entities.Placement;
 import entities.Time;
 import entities.rooms.Room;
 import utils.StringFormatter;
 
-import java.util.List;
+import java.util.*;
 
 public class Class {
     private String id;
@@ -16,48 +18,69 @@ public class Class {
     private List<Room> roomList;
     private List<Time> availableTimeList;
 
-    public Literal[] room = null;
-    public Literal[] time = null;
-    public IntVar[] penaltyRoom = null;
-    public IntVar[] penaltyTime = null;
+    public Set<Placement> placements = new HashSet<>();
+    public Map<Placement, Literal> placementLiterals = new HashMap<>();
+
+    public Map<Class, Set<String>> distributions = new HashMap<>();
+
 
     public Class() {
     }
 
-    public void initSolverConstraint() {
+    public void init() {
         if (!this.roomList.isEmpty()) {
-            this.room = new Literal[this.roomList.size()];
-            this.penaltyRoom = new IntVar[this.roomList.size()];
-            for (int i = 0; i < this.roomList.size(); i++) {
-                this.room[i] = Factory.getModel().newBoolVar("class_" + id + "_room_" + i);
-                this.penaltyRoom[i] = Factory.getModel().newIntVar(0, 100, "class_" + id + "_penalty_room_" + i);
+            for (Room r : this.roomList) {
+                for (Time t : this.availableTimeList) {
+                    if (!checkUnavailableTime(r, t)) {
+                        this.placements.add(new Placement(r, t));
+                        Factory.getPlacements().add(new Placement(r, t));
+                    }
+                }
+            }
+        } else {
+            for (Time t : this.availableTimeList) {
+                this.placements.add(new Placement(null, t));
+                Factory.getPlacements().add(new Placement(null, t));
             }
         }
-        this.time = new Literal[this.availableTimeList.size()];
-        this.penaltyTime = new IntVar[this.availableTimeList.size()];
-        for (int i = 0; i < this.availableTimeList.size(); i++) {
-            this.time[i] = Factory.getModel().newBoolVar("class_" + id + "_time_" + i);
-            this.penaltyTime[i] = Factory.getModel().newIntVar(0, 100, "class_" + id + "_penalty_time_" + i);
-        }
-        // class can meet in only specific several room and time and add penalty if not
-        if (!this.roomList.isEmpty()) {
-            Factory.getModel().addAtLeastOne(this.room);
-            for(int i = 0; i < this.roomList.size(); i++) {
-                Factory.getModel().addEquality(penaltyRoom[i], this.roomList.get(i).getPenalty()).onlyEnforceIf(room[i]);
-                Factory.getModel().addEquality(penaltyRoom[i], 0).onlyEnforceIf(room[i].not());
+    }
+
+    public static boolean checkUnavailableTime(Room r, Time t) {
+        for (Time u : r.getUnavailableList()) {
+            if (Overlap.compare(u, t)) {
+                return true;
             }
-            LinearExpr penaltyRoomExpr = LinearExpr.sum(this.penaltyRoom);
-            Factory.getModel().minimize(penaltyRoomExpr);
         }
-        if (!this.availableTimeList.isEmpty()) {
-            Factory.getModel().addAtLeastOne(this.time);
-            for(int i = 0; i < this.availableTimeList.size(); i++) {
-                Factory.getModel().addEquality(penaltyTime[i], this.availableTimeList.get(i).getPenalty()).onlyEnforceIf(time[i]);
-                Factory.getModel().addEquality(penaltyTime[i], 0).onlyEnforceIf(time[i].not());
+        return false;
+    }
+
+    public void removeDistributionConstraint(String type, Class x) {
+        if (!distributions.containsKey(x)) {
+            distributions.put(x, new HashSet<>());
+        }
+        distributions.get(x).add(type);
+        switch (type) {
+            case "SameAttendees":
+                SameAttendees.remove(this, x);
+                break;
+            case "NotOverlap":
+                NotOverlap.remove(this, x);
+                break;
+        }
+    }
+
+    public void makeSolverConstraints() {
+        for (Placement p : this.placements) {
+            Literal literal = Factory.getModel().newBoolVar("class_" + this.id + "_placement_" + p);
+            this.placementLiterals.put(p, literal);
+            Literal pl = Factory.getPlacementLiterals().get(p);
+            Factory.getModel().addImplication(literal, pl);
+            if (!Factory.getPlacementConflicts().containsKey(p)) {
+                Factory.getPlacementConflicts().put(p, new ArrayList<>());
             }
-            LinearExpr penaltyTimeExpr = LinearExpr.sum(this.penaltyTime);
-            Factory.getModel().minimize(penaltyTimeExpr);
+            Factory.getPlacementConflicts().get(p).add(literal);
         }
+        Factory.getModel().addExactlyOne(this.placementLiterals.values());
     }
 
     public String getId() {

@@ -2,8 +2,12 @@ package core.constraints.distributions;
 
 import com.google.ortools.sat.Literal;
 import core.solver.Factory;
+import entities.Placement;
 import entities.Time;
 import entities.courses.Class;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NotOverlap {
     public static boolean compare(Time i, Time j) {
@@ -11,17 +15,25 @@ public class NotOverlap {
         return i.getEnd() <= j.getStart() || j.getEnd() <= i.getStart() || DifferentDays.compare(i, j) || DifferentWeeks.compare(i, j);
     }
 
-    public static void add(Class i, Class j) {
-        for (int k = 0; k < i.getAvailableTimeList().size(); k++) {
-            Time t1 = i.getAvailableTimeList().get(k);
-            for (int l = 0; l < j.getAvailableTimeList().size(); l++) {
-                Time t2 = j.getAvailableTimeList().get(l);
-                if (!NotOverlap.compare(t1, t2)) {
-                    Factory.getModel().addBoolOr(new Literal[]{
-                        i.time[k].not(), j.time[l].not()
-                    });
+    public static void remove(Class i, Class j) {
+        List<Placement> removeList = new ArrayList<>();
+        if (i.getRoomList().isEmpty() || j.getRoomList().isEmpty()) {
+            return;
+        }
+        for (Placement p : i.placements) {
+            boolean keep = false;
+            for (Placement q : j.placements) {
+                if (NotOverlap.compare(p.getTime(), q.getTime())) {
+                    keep = true;
+                    break;
                 }
             }
+            if (!keep) {
+                removeList.add(p);
+            }
+        }
+        for (Placement p : removeList) {
+            i.placements.remove(p);
         }
     }
 }
