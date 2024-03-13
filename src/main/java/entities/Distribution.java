@@ -1,13 +1,11 @@
 package entities;
 
-import entities.courses.Class;
-
 import java.util.List;
 
 public class Distribution {
     private String type;
 
-    private List<Class> classList;
+    private List<String> classList;
 
     private boolean required;
 
@@ -22,11 +20,11 @@ public class Distribution {
         this.type = type;
     }
 
-    public List<Class> getClassList() {
+    public List<String> getClassList() {
         return classList;
     }
 
-    public void setClassList(List<Class> classList) {
+    public void setClassList(List<String> classList) {
         this.classList = classList;
     }
 

@@ -1,7 +1,5 @@
 package core.constraints.distributions;
 
-import com.google.ortools.sat.Literal;
-import core.solver.Factory;
 import entities.Placement;
 import entities.Time;
 import entities.courses.Class;
@@ -20,9 +18,9 @@ public class NotOverlap {
         if (i.getRoomList().isEmpty() || j.getRoomList().isEmpty()) {
             return;
         }
-        for (Placement p : i.placements) {
+        for (Placement p : i.getPlacements().keySet()) {
             boolean keep = false;
-            for (Placement q : j.placements) {
+            for (Placement q : j.getPlacements().keySet()) {
                 if (NotOverlap.compare(p.getTime(), q.getTime())) {
                     keep = true;
                     break;
@@ -33,7 +31,7 @@ public class NotOverlap {
             }
         }
         for (Placement p : removeList) {
-            i.placements.remove(p);
+            i.getPlacements().remove(p);
         }
     }
 }

@@ -2,19 +2,28 @@ package entities.courses;
 
 import utils.StringFormatter;
 
-import java.util.List;
+import java.util.Map;
 
 public class Course {
-    private List<Config> configList;
+    private String id;
+    private Map<String, Config> configList;
 
     public Course() {
     }
 
-    public List<Config> getConfigList() {
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Map<String, Config> getConfigList() {
         return configList;
     }
 
-    public void setConfigList(List<Config> configList) {
+    public void setConfigList(Map<String, Config> configList) {
         this.configList = configList;
     }
 

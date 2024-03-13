@@ -1,13 +1,12 @@
 package entities;
 
-import entities.courses.Course;
 import utils.StringFormatter;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class Student {
     private String id;
-    private List<Course> courseList;
+    private ArrayList<String> courseList;
 
     public Student() {
     }
@@ -20,11 +19,11 @@ public class Student {
         this.id = id;
     }
 
-    public List<Course> getCourseList() {
+    public ArrayList<String> getCourseList() {
         return courseList;
     }
 
-    public void setCourseList(List<Course> courseList) {
+    public void setCourseList(ArrayList<String> courseList) {
         this.courseList = courseList;
     }
 

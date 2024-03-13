@@ -13,6 +13,7 @@ public class Utils {
         }
         return andResult.toString();
     }
+
     public static String andWeeks(Time i, Time j) {
         StringBuilder andResult = new StringBuilder();
         for (int x = 0; x < Factory.getProblem().getNrWeeks(); x++) {

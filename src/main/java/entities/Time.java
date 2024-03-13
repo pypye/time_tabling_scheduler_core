@@ -8,8 +8,6 @@ public class Time {
     private int length;
     private String week;
 
-    private int penalty;
-
     public Time() {
     }
 
@@ -47,14 +45,6 @@ public class Time {
 
     public void setWeek(String week) {
         this.week = week;
-    }
-
-    public int getPenalty() {
-        return this.penalty;
-    }
-
-    public void setPenalty(int penalty) {
-        this.penalty = penalty;
     }
 
     @Override

@@ -18,9 +18,9 @@ public class SameStart {
         if (i.getRoomList().isEmpty() || j.getRoomList().isEmpty()) {
             return;
         }
-        for (Placement p : i.placements) {
+        for (Placement p : i.getPlacements().keySet()) {
             boolean keep = false;
-            for (Placement q : j.placements) {
+            for (Placement q : j.getPlacements().keySet()) {
                 if (SameStart.compare(p.getTime(), q.getTime())) {
                     keep = true;
                     break;
@@ -31,7 +31,7 @@ public class SameStart {
             }
         }
         for (Placement p : removeList) {
-            i.placements.remove(p);
+            i.getPlacements().remove(p);
         }
     }
 }

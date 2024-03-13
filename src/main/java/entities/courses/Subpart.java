@@ -2,19 +2,28 @@ package entities.courses;
 
 import utils.StringFormatter;
 
-import java.util.List;
+import java.util.Map;
 
 public class Subpart {
-    private List<Class> classList;
+    private String id;
+    private Map<String, Class> classList;
 
     public Subpart() {
     }
 
-    public List<Class> getClassList() {
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Map<String, Class> getClassList() {
         return classList;
     }
 
-    public void setClassList(List<Class> classList) {
+    public void setClassList(Map<String, Class> classList) {
         this.classList = classList;
     }
 

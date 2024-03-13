@@ -1,5 +1,6 @@
 package utils.parser;
 
+import core.solver.Factory;
 import entities.courses.Class;
 import entities.courses.Config;
 import entities.courses.Course;
@@ -9,64 +10,63 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import static utils.parser.DataParser.parseTime;
-import static utils.parser.RoomsParser.parseRoom;
+import static utils.parser.RoomsParser.parseRoomClass;
+import static utils.parser.TimesParser.parseTimeClass;
 
 public class CoursesParser {
     public CoursesParser() {
     }
 
-
-    public static List<Course> parseCourse(NodeList courseList) {
-        ArrayList<Course> courseArr = new ArrayList<>();
-
+    public static Map<String, Course> parseCourse(NodeList courseList) {
+        Map<String, Course> courseMap = new HashMap<>();
         for (int i = 0; i < courseList.getLength(); ++i) {
             Node course = courseList.item(i);
             if (course.getNodeType() == Node.ELEMENT_NODE) {
                 Element courseElement = (Element) course;
                 Course courseObj = new Course();
+                courseObj.setId(courseElement.getAttribute("id"));
                 courseObj.setConfigList(parseConfig(courseElement.getElementsByTagName("config")));
-                courseArr.add(courseObj);
+                courseMap.put(courseObj.getId(), courseObj);
             }
         }
-        return courseArr;
+        return courseMap;
     }
 
-    public static List<Config> parseConfig(NodeList configList) {
-        ArrayList<Config> configArr = new ArrayList<>();
-
+    public static Map<String, Config> parseConfig(NodeList configList) {
+        Map<String, Config> configMap = new HashMap<>();
         for (int i = 0; i < configList.getLength(); ++i) {
             Node config = configList.item(i);
             if (config.getNodeType() == Node.ELEMENT_NODE) {
                 Element configElement = (Element) config;
                 Config configObj = new Config();
+                configObj.setId(configElement.getAttribute("id"));
                 configObj.setSubpartList(parseSubpart(configElement.getElementsByTagName("subpart")));
-                configArr.add(configObj);
+                configMap.put(configObj.getId(), configObj);
             }
         }
-        return configArr;
+        return configMap;
     }
 
-    public static List<Subpart> parseSubpart(NodeList subpartList) {
-        ArrayList<Subpart> subpartArr = new ArrayList<>();
-
+    public static Map<String, Subpart> parseSubpart(NodeList subpartList) {
+        Map<String, Subpart> subpartMap = new HashMap<>();
         for (int i = 0; i < subpartList.getLength(); ++i) {
             Node subpart = subpartList.item(i);
             if (subpart.getNodeType() == Node.ELEMENT_NODE) {
                 Element subpartElement = (Element) subpart;
                 Subpart subpartObj = new Subpart();
+                subpartObj.setId(subpartElement.getAttribute("id"));
                 subpartObj.setClassList(parseClass(subpartElement.getElementsByTagName("class")));
-                subpartArr.add(subpartObj);
+                subpartMap.put(subpartObj.getId(), subpartObj);
             }
         }
-        return subpartArr;
+        return subpartMap;
     }
 
-    public static List<Class> parseClass(NodeList classList) {
-        ArrayList<Class> classArr = new ArrayList<>();
-
+    public static Map<String, Class> parseClass(NodeList classList) {
+        Map<String, Class> classMap = new HashMap<>();
         for (int i = 0; i < classList.getLength(); ++i) {
             Node classNode = classList.item(i);
             if (classNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -76,11 +76,24 @@ public class CoursesParser {
                 if (classElement.hasAttribute("limit")) {
                     classObj.setLimit(Integer.parseInt(classElement.getAttribute("limit")));
                 }
-                classObj.setRoomList(parseRoom(classElement.getElementsByTagName("room")));
-                classObj.setAvailableTimeList(parseTime(classElement.getElementsByTagName("time")));
-                classArr.add(classObj);
+                classObj.setRoomList(parseRoomClass(classElement.getElementsByTagName("room")));
+                classObj.setTimeList(parseTimeClass(classElement.getElementsByTagName("time")));
+                classMap.put(classObj.getId(), classObj);
+                Factory.getProblem().getClasses().put(classObj.getId(), classObj);
             }
         }
-        return classArr;
+        return classMap;
+    }
+
+    public static ArrayList<String> parseId(NodeList list) {
+        ArrayList<String> arr = new ArrayList<>();
+        for (int i = 0; i < list.getLength(); ++i) {
+            Node item = list.item(i);
+            if (item.getNodeType() == Node.ELEMENT_NODE) {
+                Element ele = (Element) item;
+                arr.add(ele.getAttribute("id"));
+            }
+        }
+        return arr;
     }
 }

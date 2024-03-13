@@ -1,12 +1,14 @@
 package entities;
 
+import com.google.ortools.sat.Literal;
+import core.constraints.defaults.TwoClassOverlap;
+import core.solver.Factory;
 import entities.courses.Class;
 import entities.courses.Course;
 import entities.rooms.Room;
 import utils.StringFormatter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Problem {
     private String name;
@@ -14,13 +16,26 @@ public class Problem {
     private int slotsPerDay;
     private int nrWeeks;
 
-    private List<Room> roomList;
-    private List<Course> courseList;
-    private List<Student> studentList;
+    private Map<String, Room> rooms;
+    private Map<String, Time> times;
+    private Map<String, Course> courses;
+    private Map<String, Class> classes;
+    private Map<String, Student> students;
+    private List<Distribution> distributions;
 
-    private List<Distribution> distributionList;
+    private final Map<Placement, ArrayList<Literal>> placementConflicts;
+
+    private final Map<Placement, Literal> placements;
 
     public Problem() {
+        rooms = new HashMap<>();
+        times = new HashMap<>();
+        courses = new HashMap<>();
+        classes = new LinkedHashMap<>();
+        students = new HashMap<>();
+        distributions = new ArrayList<>();
+        placements = new HashMap<>();
+        placementConflicts = new HashMap<>();
     }
 
     public String getName() {
@@ -55,52 +70,94 @@ public class Problem {
         this.nrWeeks = nrWeeks;
     }
 
-    public List<Room> getRoomList() {
-        return roomList;
+    public Map<String, Room> getRooms() {
+        return rooms;
     }
 
-    public void setRoomList(List<Room> roomList) {
-        this.roomList = roomList;
+    public void setRooms(Map<String, Room> rooms) {
+        this.rooms = rooms;
     }
 
-    public int getNumRooms() {
-        return roomList.size();
+    public Map<String, Time> getTimes() {
+        return times;
     }
 
-    public List<Course> getCourseList() {
-        return courseList;
+    public void setTimes(Map<String, Time> times) {
+        this.times = times;
     }
 
-    public void setCourseList(List<Course> courseList) {
-        this.courseList = courseList;
+    public Map<String, Course> getCourses() {
+        return courses;
     }
 
-    public List<Student> getStudentList() {
-        return studentList;
+    public void setCourses(Map<String, Course> courses) {
+        this.courses = courses;
     }
 
-    public void setStudentList(List<Student> studentList) {
-        this.studentList = studentList;
+    public Map<String, Class> getClasses() {
+        return classes;
     }
 
-
-    public List<Class> getClassList() {
-        ArrayList<Class> classList = new ArrayList<>();
-        this.courseList
-                .stream()
-                .flatMap(course -> course.getConfigList().stream())
-                .flatMap(config -> config.getSubpartList().stream())
-                .flatMap(subpart -> subpart.getClassList().stream())
-                .forEach(classList::add);
-        return classList;
+    public void setClasses(Map<String, Class> classes) {
+        this.classes = classes;
     }
 
-    public List<Distribution> getDistributionList() {
-        return distributionList;
+    public Map<String, Student> getStudents() {
+        return students;
     }
 
-    public void setDistributionList(List<Distribution> distributionList) {
-        this.distributionList = distributionList;
+    public void setStudents(Map<String, Student> students) {
+        this.students = students;
+    }
+
+    public List<Distribution> getDistributions() {
+        return distributions;
+    }
+
+    public void setDistributions(List<Distribution> distributions) {
+        this.distributions = distributions;
+    }
+
+    public Map<Placement, ArrayList<Literal>> getPlacementConflicts() {
+        return placementConflicts;
+    }
+
+    public Map<Placement, Literal> getPlacements() {
+        return placements;
+    }
+
+    public void makePlacementLiterals() {
+        for (Placement p : placements.keySet()) {
+            Literal l;
+            if (p.getRoom() == null) {
+                l = Factory.getModel().newBoolVar("placement_" + p.getTime());
+            } else {
+                l = Factory.getModel().newBoolVar("placement_" + p.getRoom().getId() + "_" + p.getTime());
+            }
+            placements.put(p, l);
+        }
+        for (Placement p : placements.keySet()) {
+            for (Placement q : placements.keySet()) {
+                if (p.equals(q)) {
+                    continue;
+                }
+                if (p.getRoom() == null || q.getRoom() == null) {
+                    continue;
+                }
+                if (TwoClassOverlap.compare(p.getRoom(), q.getRoom(), p.getTime(), q.getTime())) {
+                    Factory.getModel().addBoolOr(new Literal[]{placements.get(p).not(), placements.get(q).not()});
+                }
+            }
+        }
+    }
+
+    public void resolvePlacementLiteralsConflict() {
+        for (Placement p : placements.keySet()) {
+            if (placementConflicts.containsKey(p)) {
+                ArrayList<Literal> conflicts = placementConflicts.get(p);
+                Factory.getModel().addAtMostOne(conflicts.toArray(new Literal[0]));
+            }
+        }
     }
 
     @Override

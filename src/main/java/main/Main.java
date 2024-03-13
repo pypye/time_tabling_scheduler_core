@@ -1,9 +1,8 @@
 package main;
 
 import com.google.ortools.Loader;
+import core.solver.Factory;
 import core.solver.Solver;
-import entities.Problem;
-import utils.DataLoader;
 
 public class Main {
     public Main() {
@@ -14,6 +13,8 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        String path = "src/main/resources/data/lums-spr18.xml";
+        Factory.init(path);
         Solver solver = new Solver();
         solver.buildModel();
         solver.solve();

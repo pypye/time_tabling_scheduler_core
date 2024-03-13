@@ -11,8 +11,6 @@ public class Room {
     private List<Travel> travelList;
     private List<Time> unavailableList;
 
-    private int penalty;
-
     public Room() {
     }
 
@@ -46,14 +44,6 @@ public class Room {
 
     public void setUnavailableList(List<Time> unavailableList) {
         this.unavailableList = unavailableList;
-    }
-
-    public int getPenalty() {
-        return this.penalty;
-    }
-
-    public void setPenalty(int penalty) {
-        this.penalty = penalty;
     }
 
     @Override

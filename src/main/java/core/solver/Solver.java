@@ -9,6 +9,7 @@ import entities.courses.Class;
 import entities.rooms.Room;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import utils.Log;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -31,82 +32,50 @@ public class Solver {
     public Solver() {
         solver.getParameters().setNumSearchWorkers(16);
         solver.getParameters().setMaxMemoryInMb(16384);
-        solver.getParameters().setMaxTimeInSeconds(60);
+        solver.getParameters().setMaxTimeInSeconds(120);
 //        solver.getParameters().setLogSearchProgress(true);
     }
 
     public void buildModel() {
-        for (Class x : Factory.getProblem().getClassList()) {
+        for (Class x : Factory.getProblem().getClasses().values()) {
             x.init();
         }
-//        for (Distribution d : Factory.getProblem().getDistributionList()) {
-//            if (d.isRequired()) {
-//                for (Class x : d.getClassList()) {
-//                    for (Class y : d.getClassList()) {
-//                        if (d.getClassList().indexOf(y) <= d.getClassList().indexOf(x)) {
-//                            continue;
-//                        }
-//                        Class a = Factory.getProblem().getClassList()
-//                            .stream().filter(c -> c.getId().equals(x.getId())).findFirst().orElse(null);
-//                        Class b = Factory.getProblem().getClassList()
-//                            .stream().filter(c -> c.getId().equals(y.getId())).findFirst().orElse(null);
-//                        if (a != null && b != null) {
-//                            a.removeDistributionConstraint(d.getType(), b);
-//                            b.removeDistributionConstraint(d.getType(), a);
-//                        }
-//                    }
-//                }
-//            }
-//
-//        }
-        Factory.makePlacementLiterals();
-        for (Class x : Factory.getProblem().getClassList()) {
-            x.makeSolverConstraints();
+        Factory.getProblem().makePlacementLiterals();
+        for (Class x : Factory.getProblem().getClasses().values()) {
+            x.mapClassPlacementToGlobalPlacement();
         }
-        Factory.resolvePlacementLiteralsConflict();
-
-
+        Factory.getProblem().resolvePlacementLiteralsConflict();
     }
 
 
     public void solve() {
-        System.out.println("Solving...");
-        System.out.println(Factory.getModel().modelStats());
+        Log.info("Solving problem");
+        Log.info("Model info: " + Factory.getModel().modelStats());
         CpSolverStatus status;
         status = solver.solve(Factory.getModel());
         if (status == CpSolverStatus.OPTIMAL || status == CpSolverStatus.FEASIBLE) {
-            System.out.println(status);
             writeConsole(solver);
+            Log.info("Solving status: " + status);
+            Log.info("Objective value: " + solver.objectiveValue());
+            Log.info("Wall time: " + solver.wallTime());
             new File("./output").mkdir();
             writeXML(solver, "./output/solution.xml");
         } else {
-            System.out.println("No solution found!");
+            Log.error("No solution found");
         }
     }
 
     public void writeConsole(CpSolver solver) {
-        for (Class x : Factory.getProblem().getClassList()) {
+        for (Class x : Factory.getProblem().getClasses().values()) {
             Placement placement = getSolvePlacement(x);
             Room room = placement.getRoom();
             Time time = placement.getTime();
             if (room != null && time != null) {
-                System.out.println(
-                    "Class " + x.getId() +
-                        " in room " + room.getId() +
-                        " from " + time.getStart() +
-                        " to " + time.getEnd() +
-                        " on day " + time.getDays() +
-                        " on week " + time.getWeek()
-                );
+                System.out.println("Class " + x.getId() + " in room " + room.getId() + " from " + time.getStart() + " to " + time.getEnd() + " on day " + time.getDays() + " on week " + time.getWeek());
             } else {
-                if (time != null)
-                    System.out.println(
-                        "Class " + x.getId() +
-                            " from " + time.getStart() +
-                            " to " + time.getEnd() +
-                            " on day " + time.getDays() +
-                            " on week " + time.getWeek()
-                    );
+                if (time != null) {
+                    System.out.println("Class " + x.getId() + " from " + time.getStart() + " to " + time.getEnd() + " on day " + time.getDays() + " on week " + time.getWeek());
+                }
             }
         }
         System.out.println("Total penalty: " + solver.objectiveValue());
@@ -127,7 +96,7 @@ public class Solver {
             rootEle.setAttribute("institution", "UET");
             rootEle.setAttribute("country", "Vietnam");
             dom.appendChild(rootEle);
-            for (Class x : Factory.getProblem().getClassList()) {
+            for (Class x : Factory.getProblem().getClasses().values()) {
                 e = dom.createElement("class");
                 e.setAttribute("id", x.getId());
                 Placement placement = getSolvePlacement(x);
@@ -151,16 +120,16 @@ public class Solver {
                 tr.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "http://www.itc2019.org/competition-format.dtd");
                 tr.transform(new DOMSource(dom), new StreamResult(new FileOutputStream(path)));
             } catch (TransformerException | IOException te) {
-                System.out.println(te.getMessage());
+                Log.error("Error while trying to write XML " + te);
             }
         } catch (ParserConfigurationException pce) {
-            System.out.println("Error while trying to instantiate DocumentBuilder " + pce);
+            Log.error("Error while trying to instantiate DocumentBuilder " + pce);
         }
     }
 
     private Placement getSolvePlacement(Class x) {
         Placement placement = null;
-        for (Map.Entry<Placement, Literal> entry : x.placementLiterals.entrySet()) {
+        for (Map.Entry<Placement, Literal> entry : x.getPlacements().entrySet()) {
             if (solver.value(entry.getValue()) == 1) {
                 placement = entry.getKey();
                 break;

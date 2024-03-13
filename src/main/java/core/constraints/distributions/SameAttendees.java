@@ -16,9 +16,9 @@ public class SameAttendees {
         Travel travel_i_to_j = findTravel(r_i, r_j);
         Travel travel_j_to_i = findTravel(r_j, r_i);
         int travel_time = 0;
-        if(travel_i_to_j != null) {
+        if (travel_i_to_j != null) {
             travel_time = travel_i_to_j.getValue();
-        } else if(travel_j_to_i != null) {
+        } else if (travel_j_to_i != null) {
             travel_time = travel_j_to_i.getValue();
         }
         return (t_i.getEnd() + travel_time <= t_j.getStart()) || (t_j.getEnd() + travel_time <= t_i.getStart()) || DifferentDays.compare(t_i, t_j) || DifferentWeeks.compare(t_i, t_j);
@@ -33,9 +33,9 @@ public class SameAttendees {
         if (i.getRoomList().isEmpty() || j.getRoomList().isEmpty()) {
             return;
         }
-        for (Placement p : i.placements) {
+        for (Placement p : i.getPlacements().keySet()) {
             boolean keep = false;
-            for (Placement q : j.placements) {
+            for (Placement q : j.getPlacements().keySet()) {
                 if (SameAttendees.compare(p.getRoom(), q.getRoom(), p.getTime(), q.getTime())) {
                     keep = true;
                     break;
@@ -46,7 +46,7 @@ public class SameAttendees {
             }
         }
         for (Placement p : removeList) {
-            i.placements.remove(p);
+            i.getPlacements().remove(p);
         }
     }
 }

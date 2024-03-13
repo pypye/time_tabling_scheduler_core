@@ -1,10 +1,8 @@
 package core.constraints.distributions;
 
-import com.google.ortools.sat.Literal;
 import core.constraints.utils.Utils;
 import core.solver.Factory;
 import entities.Time;
-import entities.courses.Class;
 
 public class DifferentWeeks {
     public static boolean compare(Time i, Time j) {

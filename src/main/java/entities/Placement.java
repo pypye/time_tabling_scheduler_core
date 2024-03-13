@@ -42,7 +42,7 @@ public class Placement {
             return false;
 
         }
-        return room.getId().equals(placement.getRoom().getId()) && time.equals(placement.getTime());
+        return room.equals(placement.getRoom()) && time.equals(placement.getTime());
     }
 
     @Override
