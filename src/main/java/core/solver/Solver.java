@@ -33,13 +33,14 @@ public class Solver {
         solver.getParameters().setNumSearchWorkers(16);
         solver.getParameters().setMaxMemoryInMb(16384);
         solver.getParameters().setMaxTimeInSeconds(120);
-//        solver.getParameters().setLogSearchProgress(true);
+        solver.getParameters().setLogSearchProgress(true);
     }
 
     public void buildModel() {
         for (Class x : Factory.getProblem().getClasses().values()) {
             x.init();
         }
+        Factory.getProblem().prepareDistribution();
         Factory.getProblem().makePlacementLiterals();
         for (Class x : Factory.getProblem().getClasses().values()) {
             x.mapClassPlacementToGlobalPlacement();
@@ -62,6 +63,8 @@ public class Solver {
             writeXML(solver, "./output/solution.xml");
         } else {
             Log.error("No solution found");
+            Log.info("Solving status: " + status);
+            Log.info("Wall time: " + solver.wallTime());
         }
     }
 

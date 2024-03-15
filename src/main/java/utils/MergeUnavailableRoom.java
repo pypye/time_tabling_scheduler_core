@@ -17,7 +17,7 @@ public class MergeUnavailableRoom {
                 current.setWeek(currentList.get(i).getWeek());
                 current.setDays(currentList.get(i).getDays());
                 for (int j = i + 1; j < currentList.size(); j++) {
-                    if (currentList.get(i).getStart() == currentList.get(j).getStart() && currentList.get(i).getLength() == currentList.get(j).getLength() && currentList.get(i).getDays().equals(currentList.get(j).getDays())) {
+                    if (!isVisited[j] && currentList.get(i).getStart() == currentList.get(j).getStart() && currentList.get(i).getLength() == currentList.get(j).getLength() && currentList.get(i).getDays().equals(currentList.get(j).getDays())) {
                         current = merge(current, currentList.get(j));
                         isVisited[j] = true;
                     }

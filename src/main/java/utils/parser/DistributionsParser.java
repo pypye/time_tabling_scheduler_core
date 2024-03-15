@@ -21,6 +21,9 @@ public class DistributionsParser {
                 distributionObj.setType(distributionElement.getAttribute("type"));
                 distributionObj.setClassList(parseId(distributionElement.getElementsByTagName("class")));
                 distributionObj.setRequired(distributionElement.getAttribute("required").equals("true"));
+                if (distributionElement.hasAttribute("penalty")) {
+                    distributionObj.setPenalty(Integer.parseInt(distributionElement.getAttribute("penalty")));
+                }
                 distributionArr.add(distributionObj);
             }
         }

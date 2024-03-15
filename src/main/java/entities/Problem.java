@@ -136,8 +136,11 @@ public class Problem {
             }
             placements.put(p, l);
         }
-        for (Placement p : placements.keySet()) {
-            for (Placement q : placements.keySet()) {
+        ArrayList<Placement> placementList = new ArrayList<>(placements.keySet());
+        for (int i = 0; i < placementList.size(); i++) {
+            Placement p = placementList.get(i);
+            for (int j = i + 1; j < placementList.size(); j++) {
+                Placement q = placementList.get(j);
                 if (p.equals(q)) {
                     continue;
                 }
@@ -157,6 +160,12 @@ public class Problem {
                 ArrayList<Literal> conflicts = placementConflicts.get(p);
                 Factory.getModel().addAtMostOne(conflicts.toArray(new Literal[0]));
             }
+        }
+    }
+
+    public void prepareDistribution() {
+        for (Distribution d : distributions) {
+            System.out.println(d);
         }
     }
 
