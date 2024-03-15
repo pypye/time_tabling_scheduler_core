@@ -1,5 +1,7 @@
 package core.constraints.distributions;
 
+import com.google.ortools.sat.Literal;
+import core.solver.Factory;
 import entities.Placement;
 import entities.Time;
 import entities.courses.Class;
@@ -32,6 +34,25 @@ public class SameStart {
         }
         for (Placement p : removeList) {
             i.getPlacements().remove(p);
+        }
+    }
+
+    public static void resolve(Class i, Class j) {
+        for (Time t1 : Factory.getProblem().getTimes().values()) {
+            if (i.getTimes().get(t1) == null) {
+                continue;
+            }
+            for (Time t2 : Factory.getProblem().getTimes().values()) {
+                if (j.getTimes().get(t2) == null) {
+                    continue;
+                }
+                if (!SameStart.compare(t1, t2)) {
+                    Factory.getModel().addBoolOr(new Literal[]{
+                        i.getTimes().get(t1).not(),
+                        j.getTimes().get(t2).not()
+                    });
+                }
+            }
         }
     }
 }

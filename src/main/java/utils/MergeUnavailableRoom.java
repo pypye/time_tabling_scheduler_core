@@ -14,7 +14,7 @@ public class MergeUnavailableRoom {
                 Time current = new Time();
                 current.setStart(currentList.get(i).getStart());
                 current.setLength(currentList.get(i).getLength());
-                current.setWeek(currentList.get(i).getWeek());
+                current.setWeeks(currentList.get(i).getWeeks());
                 current.setDays(currentList.get(i).getDays());
                 for (int j = i + 1; j < currentList.size(); j++) {
                     if (!isVisited[j] && currentList.get(i).getStart() == currentList.get(j).getStart() && currentList.get(i).getLength() == currentList.get(j).getLength() && currentList.get(i).getDays().equals(currentList.get(j).getDays())) {
@@ -37,10 +37,10 @@ public class MergeUnavailableRoom {
                 Time current = new Time();
                 current.setStart(currentList.get(i).getStart());
                 current.setLength(currentList.get(i).getLength());
-                current.setWeek(currentList.get(i).getWeek());
+                current.setWeeks(currentList.get(i).getWeeks());
                 current.setDays(currentList.get(i).getDays());
                 for (int j = i + 1; j < currentList.size(); j++) {
-                    if (currentList.get(i).getStart() == currentList.get(j).getStart() && currentList.get(i).getLength() == currentList.get(j).getLength() && currentList.get(i).getWeek().equals(currentList.get(j).getWeek())) {
+                    if (currentList.get(i).getStart() == currentList.get(j).getStart() && currentList.get(i).getLength() == currentList.get(j).getLength() && currentList.get(i).getWeeks().equals(currentList.get(j).getWeeks())) {
                         current = merge(current, currentList.get(j));
                         isVisited[j] = true;
                     }
@@ -57,14 +57,14 @@ public class MergeUnavailableRoom {
         result.setStart(a.getStart());
         result.setLength(a.getLength());
         StringBuilder newWk = new StringBuilder();
-        for (int i = 0; i < a.getWeek().length(); i++) {
-            if (a.getWeek().charAt(i) == '1' || b.getWeek().charAt(i) == '1') {
+        for (int i = 0; i < a.getWeeks().length(); i++) {
+            if (a.getWeeks().charAt(i) == '1' || b.getWeeks().charAt(i) == '1') {
                 newWk.append('1');
             } else {
                 newWk.append('0');
             }
         }
-        result.setWeek(newWk.toString());
+        result.setWeeks(newWk.toString());
         StringBuilder newDay = new StringBuilder();
         for (int i = 0; i < a.getDays().length(); i++) {
             if (a.getDays().charAt(i) == '1' || b.getDays().charAt(i) == '1') {

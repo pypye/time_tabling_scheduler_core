@@ -17,8 +17,8 @@ public class Utils {
     public static String andWeeks(Time i, Time j) {
         StringBuilder andResult = new StringBuilder();
         for (int x = 0; x < Factory.getProblem().getNrWeeks(); x++) {
-            int temp_i = i.getWeek().charAt(x) - '0';
-            int temp_j = j.getWeek().charAt(x) - '0';
+            int temp_i = i.getWeeks().charAt(x) - '0';
+            int temp_j = j.getWeeks().charAt(x) - '0';
             andResult.append(temp_i & temp_j);
         }
         return andResult.toString();
@@ -37,8 +37,8 @@ public class Utils {
     public static String orWeeks(Time i, Time j) {
         StringBuilder orResult = new StringBuilder();
         for (int x = 0; x < Factory.getProblem().getNrWeeks(); x++) {
-            int temp_i = i.getWeek().charAt(x) - '0';
-            int temp_j = j.getWeek().charAt(x) - '0';
+            int temp_i = i.getWeeks().charAt(x) - '0';
+            int temp_j = j.getWeeks().charAt(x) - '0';
             orResult.append(temp_i | temp_j);
         }
         return orResult.toString();

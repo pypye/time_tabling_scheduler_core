@@ -1,5 +1,7 @@
 package core.constraints.distributions;
 
+import com.google.ortools.sat.Literal;
+import core.solver.Factory;
 import entities.Placement;
 import entities.Time;
 import entities.courses.Class;
@@ -13,13 +15,16 @@ public class SameAttendees {
     public static boolean compare(Room r_i, Room r_j, Time t_i, Time t_j) {
         // (Ci.end + Ci.room.travel[Cj.room] ≤ Cj.start) ∨ (Cj.end + Cj.room.travel[Ci.room] ≤ Ci.start) ∨
         // ((Ci.days and Cj.days) = 0) ∨ ((Ci.weeks and Cj.weeks) = 0)
-        Travel travel_i_to_j = findTravel(r_i, r_j);
-        Travel travel_j_to_i = findTravel(r_j, r_i);
         int travel_time = 0;
-        if (travel_i_to_j != null) {
-            travel_time = travel_i_to_j.getValue();
-        } else if (travel_j_to_i != null) {
-            travel_time = travel_j_to_i.getValue();
+        if (r_i != null && r_j != null) {
+            Travel travel_i_to_j = findTravel(r_i, r_j);
+            Travel travel_j_to_i = findTravel(r_j, r_i);
+
+            if (travel_i_to_j != null) {
+                travel_time = travel_i_to_j.getValue();
+            } else if (travel_j_to_i != null) {
+                travel_time = travel_j_to_i.getValue();
+            }
         }
         return (t_i.getEnd() + travel_time <= t_j.getStart()) || (t_j.getEnd() + travel_time <= t_i.getStart()) || DifferentDays.compare(t_i, t_j) || DifferentWeeks.compare(t_i, t_j);
     }
@@ -30,9 +35,6 @@ public class SameAttendees {
 
     public static void remove(Class i, Class j) {
         List<Placement> removeList = new ArrayList<>();
-        if (i.getRoomList().isEmpty() || j.getRoomList().isEmpty()) {
-            return;
-        }
         for (Placement p : i.getPlacements().keySet()) {
             boolean keep = false;
             for (Placement q : j.getPlacements().keySet()) {
@@ -47,6 +49,19 @@ public class SameAttendees {
         }
         for (Placement p : removeList) {
             i.getPlacements().remove(p);
+        }
+    }
+
+    public static void resolve(Class i, Class j) {
+        for (Placement p : i.getPlacements().keySet()) {
+            for (Placement q : j.getPlacements().keySet()) {
+                if (!SameAttendees.compare(p.getRoom(), q.getRoom(), p.getTime(), q.getTime())) {
+                    Factory.getModel().addBoolOr(new Literal[]{
+                        i.getPlacements().get(p).not(),
+                        j.getPlacements().get(q).not()
+                    });
+                }
+            }
         }
     }
 }

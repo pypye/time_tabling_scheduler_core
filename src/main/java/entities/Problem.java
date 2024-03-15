@@ -2,6 +2,10 @@ package entities;
 
 import com.google.ortools.sat.Literal;
 import core.constraints.defaults.TwoClassOverlap;
+import core.constraints.distributions.MaxBlock;
+import core.constraints.distributions.MaxBreaks;
+import core.constraints.distributions.MaxDayLoad;
+import core.constraints.distributions.MaxDays;
 import core.solver.Factory;
 import entities.courses.Class;
 import entities.courses.Course;
@@ -27,6 +31,8 @@ public class Problem {
 
     private final Map<Placement, Literal> placements;
 
+    private final Set<String> resolvedHardDistributions;
+
     public Problem() {
         rooms = new HashMap<>();
         times = new HashMap<>();
@@ -36,6 +42,7 @@ public class Problem {
         distributions = new ArrayList<>();
         placements = new HashMap<>();
         placementConflicts = new HashMap<>();
+        resolvedHardDistributions = new HashSet<>();
     }
 
     public String getName() {
@@ -126,25 +133,23 @@ public class Problem {
         return placements;
     }
 
-    public void makePlacementLiterals() {
+    public void makePlacementLiteralFromPlacement() {
         for (Placement p : placements.keySet()) {
-            Literal l;
-            if (p.getRoom() == null) {
-                l = Factory.getModel().newBoolVar("placement_" + p.getTime());
-            } else {
-                l = Factory.getModel().newBoolVar("placement_" + p.getRoom().getId() + "_" + p.getTime());
-            }
+            Literal l = Factory.getModel().newBoolVar("p_" + p);
             placements.put(p, l);
         }
+    }
+
+    public void findPlacementOverlapConflict() {
         ArrayList<Placement> placementList = new ArrayList<>(placements.keySet());
         for (int i = 0; i < placementList.size(); i++) {
             Placement p = placementList.get(i);
+            if (p.getRoom() == null) {
+                continue;
+            }
             for (int j = i + 1; j < placementList.size(); j++) {
                 Placement q = placementList.get(j);
-                if (p.equals(q)) {
-                    continue;
-                }
-                if (p.getRoom() == null || q.getRoom() == null) {
+                if (q.getRoom() == null) {
                     continue;
                 }
                 if (TwoClassOverlap.compare(p.getRoom(), q.getRoom(), p.getTime(), q.getTime())) {
@@ -154,7 +159,7 @@ public class Problem {
         }
     }
 
-    public void resolvePlacementLiteralsConflict() {
+    public void resolvePlacementOverlapConflict() {
         for (Placement p : placements.keySet()) {
             if (placementConflicts.containsKey(p)) {
                 ArrayList<Literal> conflicts = placementConflicts.get(p);
@@ -163,9 +168,53 @@ public class Problem {
         }
     }
 
-    public void prepareDistribution() {
+    public void preRemovePlacementDistributionConflict() {
         for (Distribution d : distributions) {
-            System.out.println(d);
+            if (d.isRequired()) {
+                for (int i = 0; i < d.getClassList().size(); i++) {
+                    for (int j = i + 1; j < d.getClassList().size(); j++) {
+                        Class c1 = classes.get(d.getClassList().get(i));
+                        Class c2 = classes.get(d.getClassList().get(j));
+                        c1.removeDistributionConflict(d.getType(), c2);
+                        c2.removeDistributionConflict(d.getType(), c1);
+                    }
+                }
+            }
+        }
+    }
+
+    public void resolvePlacementDistributionConflict() {
+        int count = 0;
+        for (Distribution d : distributions) {
+            count++;
+            System.out.println("Distribution " + count + " of " + distributions.size() + " : " + d);
+            if (d.isRequired()) {
+                if(!MaxDays.isMaxDays(d.getType())
+                    && !MaxDayLoad.isMaxDayLoad(d.getType())
+                    && !MaxBreaks.isMaxBreaks(d.getType())
+                    && !MaxBlock.isMaxBlock(d.getType())) {
+                    for (int i = 0; i < d.getClassList().size(); i++) {
+                        for (int j = i + 1; j < d.getClassList().size(); j++) {
+                            Class c1 = classes.get(d.getClassList().get(i));
+                            Class c2 = classes.get(d.getClassList().get(j));
+                            String key;
+                            if (c1.getId().compareTo(c2.getId()) < 0) {
+                                key = d.getType() + "_" + c1.getId() + "_" + c2.getId();
+                            } else {
+                                key = d.getType() + "_" + c2.getId() + "_" + c1.getId();
+                            }
+                            if (!resolvedHardDistributions.contains(key)) {
+                                c1.resolveDistributionConflict(d.getType(), c2);
+                                resolvedHardDistributions.add(key);
+                            }
+                        }
+                    }
+                } else {
+                    if (MaxDays.isMaxDays(d.getType())) {
+                        MaxDays.resolve(d.getClassList(), MaxDays.getD(d.getType()));
+                    }
+                }
+            }
         }
     }
 

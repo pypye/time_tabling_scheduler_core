@@ -13,7 +13,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        String path = "src/main/resources/data/lums-spr18.xml";
+        String path = "src/main/resources/data/bet-fal17.xml";
         Factory.init(path);
         Solver solver = new Solver();
         solver.buildModel();

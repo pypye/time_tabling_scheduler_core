@@ -32,22 +32,25 @@ public class Solver {
     public Solver() {
         solver.getParameters().setNumSearchWorkers(16);
         solver.getParameters().setMaxMemoryInMb(16384);
-        solver.getParameters().setMaxTimeInSeconds(120);
+//        solver.getParameters().setMaxTimeInSeconds(120);
         solver.getParameters().setLogSearchProgress(true);
     }
 
     public void buildModel() {
+        Log.info("Building model");
         for (Class x : Factory.getProblem().getClasses().values()) {
             x.init();
         }
-        Factory.getProblem().prepareDistribution();
-        Factory.getProblem().makePlacementLiterals();
+        Factory.getProblem().preRemovePlacementDistributionConflict();
+        Factory.getProblem().makePlacementLiteralFromPlacement();
+        Factory.getProblem().findPlacementOverlapConflict();
         for (Class x : Factory.getProblem().getClasses().values()) {
+            x.makeRoomAndTimeLiteral();
             x.mapClassPlacementToGlobalPlacement();
         }
-        Factory.getProblem().resolvePlacementLiteralsConflict();
+        Factory.getProblem().resolvePlacementOverlapConflict();
+        Factory.getProblem().resolvePlacementDistributionConflict();
     }
-
 
     public void solve() {
         Log.info("Solving problem");
@@ -74,10 +77,10 @@ public class Solver {
             Room room = placement.getRoom();
             Time time = placement.getTime();
             if (room != null && time != null) {
-                System.out.println("Class " + x.getId() + " in room " + room.getId() + " from " + time.getStart() + " to " + time.getEnd() + " on day " + time.getDays() + " on week " + time.getWeek());
+                System.out.println("Class " + x.getId() + " in room " + room.getId() + " from " + time.getStart() + " to " + time.getEnd() + " on day " + time.getDays() + " on week " + time.getWeeks());
             } else {
                 if (time != null) {
-                    System.out.println("Class " + x.getId() + " from " + time.getStart() + " to " + time.getEnd() + " on day " + time.getDays() + " on week " + time.getWeek());
+                    System.out.println("Class " + x.getId() + " from " + time.getStart() + " to " + time.getEnd() + " on day " + time.getDays() + " on week " + time.getWeeks());
                 }
             }
         }
@@ -111,7 +114,7 @@ public class Solver {
                 if (time != null) {
                     e.setAttribute("start", String.valueOf(time.getStart()));
                     e.setAttribute("days", time.getDays());
-                    e.setAttribute("weeks", time.getWeek());
+                    e.setAttribute("weeks", time.getWeeks());
                 }
                 rootEle.appendChild(e);
             }

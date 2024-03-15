@@ -6,7 +6,7 @@ public class Time {
     private String days;
     private int start;
     private int length;
-    private String week;
+    private String weeks;
 
     public Time() {
     }
@@ -39,12 +39,12 @@ public class Time {
         this.length = length;
     }
 
-    public String getWeek() {
-        return this.week;
+    public String getWeeks() {
+        return this.weeks;
     }
 
-    public void setWeek(String week) {
-        this.week = week;
+    public void setWeeks(String weeks) {
+        this.weeks = weeks;
     }
 
     @Override
@@ -63,7 +63,7 @@ public class Time {
         return this.getStart() == time.getStart()
             && this.getEnd() == time.getEnd()
             && this.getDays().equals(time.getDays())
-            && this.getWeek().equals(time.getWeek());
+            && this.getWeeks().equals(time.getWeeks());
     }
 
     @Override
@@ -71,7 +71,7 @@ public class Time {
         int result = days != null ? days.hashCode() : 0;
         result = 31 * result + start;
         result = 31 * result + length;
-        result = 31 * result + (week != null ? week.hashCode() : 0);
+        result = 31 * result + (weeks != null ? weeks.hashCode() : 0);
         return result;
     }
 

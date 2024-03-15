@@ -20,7 +20,7 @@ public class TimesParser {
                 Time timeObj = new Time();
                 timeObj.setStart(Integer.parseInt(timeElement.getAttribute("start")));
                 timeObj.setLength(Integer.parseInt(timeElement.getAttribute("length")));
-                timeObj.setWeek(timeElement.getAttribute("weeks"));
+                timeObj.setWeeks(timeElement.getAttribute("weeks"));
                 timeObj.setDays(timeElement.getAttribute("days"));
                 timeArr.add(timeObj);
             }
@@ -46,7 +46,7 @@ public class TimesParser {
                     timeObj = new Time();
                     timeObj.setStart(Integer.parseInt(timeElement.getAttribute("start")));
                     timeObj.setLength(Integer.parseInt(timeElement.getAttribute("length")));
-                    timeObj.setWeek(timeElement.getAttribute("weeks"));
+                    timeObj.setWeeks(timeElement.getAttribute("weeks"));
                     timeObj.setDays(timeElement.getAttribute("days"));
                     Factory.getProblem().getTimes().put(encodeTime, timeObj);
                 } else {

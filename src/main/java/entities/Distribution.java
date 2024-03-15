@@ -2,12 +2,13 @@ package entities;
 
 import utils.StringFormatter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Distribution {
     private String type;
 
-    private List<String> classList;
+    private ArrayList<String> classList;
 
     private boolean required;
 
@@ -24,11 +25,11 @@ public class Distribution {
         this.type = type;
     }
 
-    public List<String> getClassList() {
+    public ArrayList<String> getClassList() {
         return classList;
     }
 
-    public void setClassList(List<String> classList) {
+    public void setClassList(ArrayList<String> classList) {
         this.classList = classList;
     }
 

@@ -1,36 +1,42 @@
 package core.constraints.distributions;
 
+import com.google.ortools.sat.LinearExpr;
+import com.google.ortools.sat.Literal;
+import core.solver.ConstraintHandler;
 import core.solver.Factory;
-import entities.Time;
+import entities.courses.Class;
 
 import java.util.ArrayList;
 
 public class MaxDays {
 
-    public static boolean compare(ArrayList<Time> times, int D) {
-        // countNonzeroBits(C1.days or C2.days or ⋅ ⋅ ⋅ Cn.days) ≤ D
-        int count = 0;
-        StringBuilder orResult = new StringBuilder();
-        orResult.append("0".repeat(Math.max(0, Factory.getProblem().getNrDays())));
-        for (Time time : times) {
-            orResult = new StringBuilder(orDays(orResult.toString(), time.getDays()));
-        }
-
-        for (int x = 0; x < Factory.getProblem().getNrDays(); x++) {
-            if (orResult.charAt(x) == '1') {
-                count++;
-            }
-        }
-        return count <= D;
+    public static boolean isMaxDays(String t) {
+        return t.contains("MaxDays");
     }
 
-    private static String orDays(String i, String j) {
-        StringBuilder orResult = new StringBuilder();
-        for (int x = 0; x < Factory.getProblem().getNrDays(); x++) {
-            int temp_i = i.charAt(x) - '0';
-            int temp_j = j.charAt(x) - '0';
-            orResult.append((temp_i | temp_j) + '0');
+    public static int getD(String t) {
+        int pos0 = t.indexOf("(");
+        int pos1 = t.indexOf(")");
+        return Integer.parseInt(t.substring(pos0 + 1, pos1));
+    }
+
+    public static void resolve(ArrayList<String> classes, int D) {
+        ArrayList<Literal> daysLit = new ArrayList<>();
+        for (int i = 0; i < Factory.getProblem().getNrDays(); i++) {
+            ArrayList<Literal> lit = new ArrayList<>();
+            ArrayList<Literal> litNot = new ArrayList<>();
+            for (String c : classes) {
+                Class cl = Factory.getProblem().getClasses().get(c);
+                lit.add(cl.getDays().get(i));
+                litNot.add(cl.getDays().get(i).not());
+            }
+            Literal l = ConstraintHandler.addConstraint(
+                Factory.getModel().addBoolOr(lit),
+                Factory.getModel().addBoolAnd(litNot)
+            );
+            daysLit.add(l);
         }
-        return orResult.toString();
+        LinearExpr expr = LinearExpr.sum(daysLit.toArray(new Literal[0]));
+        Factory.getModel().addLessOrEqual(expr, D);
     }
 }
