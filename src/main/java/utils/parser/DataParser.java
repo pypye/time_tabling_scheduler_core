@@ -1,11 +1,13 @@
 package utils.parser;
 
 import core.solver.Factory;
+import entities.Optimization;
 import entities.Problem;
 import entities.Time;
 import entities.rooms.Room;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import java.util.List;
 
@@ -28,6 +30,7 @@ public class DataParser {
         problem.setSlotsPerDay(Integer.parseInt(problemElement.getAttribute("slotsPerDay")));
         problem.setNrWeeks(Integer.parseInt(problemElement.getAttribute("nrWeeks")));
 
+        problem.setOptimization(parseOptimization(doc.getElementsByTagName("optimization").item(0)));
         problem.setRooms(parseRoom(doc.getElementsByTagName("rooms").item(0).getChildNodes()));
         problem.setCourses(parseCourse(doc.getElementsByTagName("courses").item(0).getChildNodes()));
         problem.setStudents(parseStudent(doc.getElementsByTagName("students").item(0).getChildNodes()));
@@ -41,5 +44,15 @@ public class DataParser {
             unavailableList = mergeWithWeeks(unavailableList);
             y.setUnavailableList(unavailableList);
         }
+    }
+
+    public static Optimization parseOptimization(Node node) {
+        Optimization optimization = new Optimization();
+        Element optimizationElement = (Element) node;
+        optimization.setRoom(Integer.parseInt(optimizationElement.getAttribute("room")));
+        optimization.setTime(Integer.parseInt(optimizationElement.getAttribute("time")));
+        optimization.setDistribution(Integer.parseInt(optimizationElement.getAttribute("distribution")));
+        optimization.setStudent(Integer.parseInt(optimizationElement.getAttribute("student")));
+        return optimization;
     }
 }

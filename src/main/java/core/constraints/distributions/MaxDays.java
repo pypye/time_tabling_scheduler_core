@@ -19,7 +19,9 @@ public class MaxDays {
         int pos1 = t.indexOf(")");
         return Integer.parseInt(t.substring(pos0 + 1, pos1));
     }
-
+    // n classes
+    // L[i] = d[i]_c1 + d[i]_c2 + ... + d[i]_cn
+    // F = L[1] + L[2] + ... + L[n] <= D
     public static void resolve(ArrayList<String> classes, int D) {
         ArrayList<Literal> daysLit = new ArrayList<>();
         for (int i = 0; i < Factory.getProblem().getNrDays(); i++) {

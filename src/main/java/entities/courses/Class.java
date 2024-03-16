@@ -204,9 +204,6 @@ public class Class implements Comparable<Class> {
             case "Overlap":
                 Overlap.remove(this, x);
                 break;
-//            case "Precedence":
-//                Precedence.remove(this, x);
-//                break;
             case "SameAttendees":
                 SameAttendees.remove(this, x);
                 break;
@@ -258,9 +255,9 @@ public class Class implements Comparable<Class> {
             case "Precedence":
                 Precedence.resolve(this, x);
                 break;
-//            case "SameAttendees":
-//                SameAttendees.resolve(this, x);
-//                break;
+            case "SameAttendees":
+                SameAttendees.resolve(this, x);
+                break;
             case "SameDays":
                 SameDays.resolve(this, x);
                 break;

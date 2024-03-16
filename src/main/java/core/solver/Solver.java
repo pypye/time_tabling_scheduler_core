@@ -50,6 +50,7 @@ public class Solver {
         }
         Factory.getProblem().resolvePlacementOverlapConflict();
         Factory.getProblem().resolvePlacementDistributionConflict();
+        Factory.getProblem().computePenaltyObjective();
     }
 
     public void solve() {

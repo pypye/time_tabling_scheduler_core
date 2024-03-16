@@ -1,5 +1,6 @@
 package entities;
 
+import com.google.ortools.sat.LinearExpr;
 import com.google.ortools.sat.Literal;
 import core.constraints.defaults.TwoClassOverlap;
 import core.constraints.distributions.MaxBlock;
@@ -19,6 +20,8 @@ public class Problem {
     private int nrDays;
     private int slotsPerDay;
     private int nrWeeks;
+
+    private Optimization optimization;
 
     private Map<String, Room> rooms;
     private Map<String, Time> times;
@@ -75,6 +78,14 @@ public class Problem {
 
     public void setNrWeeks(int nrWeeks) {
         this.nrWeeks = nrWeeks;
+    }
+
+    public Optimization getOptimization() {
+        return optimization;
+    }
+
+    public void setOptimization(Optimization optimization) {
+        this.optimization = optimization;
     }
 
     public Map<String, Room> getRooms() {
@@ -189,7 +200,7 @@ public class Problem {
             count++;
             System.out.println("Distribution " + count + " of " + distributions.size() + " : " + d);
             if (d.isRequired()) {
-                if(!MaxDays.isMaxDays(d.getType())
+                if (!MaxDays.isMaxDays(d.getType())
                     && !MaxDayLoad.isMaxDayLoad(d.getType())
                     && !MaxBreaks.isMaxBreaks(d.getType())
                     && !MaxBlock.isMaxBlock(d.getType())) {
@@ -213,9 +224,34 @@ public class Problem {
                     if (MaxDays.isMaxDays(d.getType())) {
                         MaxDays.resolve(d.getClassList(), MaxDays.getD(d.getType()));
                     }
+                    if (MaxDayLoad.isMaxDayLoad(d.getType())) {
+                        MaxDayLoad.resolve(d.getClassList(), MaxDayLoad.getS(d.getType()));
+                    }
                 }
             }
         }
+    }
+
+    public void computePenaltyObjective() {
+        ArrayList<Literal> penalties = new ArrayList<>();
+        ArrayList<Integer> weights = new ArrayList<>();
+        for (Class c : classes.values()) {
+            for (Penalty<Room> pr : c.getRoomList()) {
+                Room r = pr.getEntity();
+                for (Penalty<Time> pt : c.getTimeList()) {
+                    Time t = pt.getEntity();
+                    Placement p = new Placement(r, t);
+                    if (c.getPlacements().containsKey(p)) {
+                        penalties.add(c.getPlacements().get(p));
+                        weights.add(
+                            Factory.getProblem().getOptimization().getRoom() * pr.getPenalty() + Factory.getProblem().getOptimization().getTime() * pt.getPenalty()
+                        );
+                    }
+                }
+            }
+        }
+        LinearExpr expr = LinearExpr.weightedSum(penalties.toArray(new Literal[0]), weights.stream().mapToLong(i -> i).toArray());
+        Factory.getModel().minimize(expr);
     }
 
     @Override
