@@ -1,6 +1,7 @@
 package entities;
 
 import com.google.ortools.sat.LinearExpr;
+import com.google.ortools.sat.LinearExprBuilder;
 import com.google.ortools.sat.Literal;
 import core.constraints.defaults.TwoClassOverlap;
 import core.constraints.distributions.MaxBlock;
@@ -34,7 +35,9 @@ public class Problem {
 
     private final Map<Placement, Literal> placements;
 
-    private final Set<String> resolvedHardDistributions;
+    private final Set<String> resolvedDistributions;
+
+    private final ArrayList<LinearExpr> softDistributionExpr;
 
     public Problem() {
         rooms = new HashMap<>();
@@ -45,7 +48,8 @@ public class Problem {
         distributions = new ArrayList<>();
         placements = new HashMap<>();
         placementConflicts = new HashMap<>();
-        resolvedHardDistributions = new HashSet<>();
+        resolvedDistributions = new HashSet<>();
+        softDistributionExpr = new ArrayList<>();
     }
 
     public String getName() {
@@ -144,6 +148,10 @@ public class Problem {
         return placements;
     }
 
+    public ArrayList<LinearExpr> getSoftDistributionExpr() {
+        return softDistributionExpr;
+    }
+
     public void makePlacementLiteralFromPlacement() {
         for (Placement p : placements.keySet()) {
             Literal l = Factory.getModel().newBoolVar("p_" + p);
@@ -199,28 +207,28 @@ public class Problem {
         for (Distribution d : distributions) {
             count++;
             System.out.println("Distribution " + count + " of " + distributions.size() + " : " + d);
-            if (d.isRequired()) {
-                if (!MaxDays.isMaxDays(d.getType())
-                    && !MaxDayLoad.isMaxDayLoad(d.getType())
-                    && !MaxBreaks.isMaxBreaks(d.getType())
-                    && !MaxBlock.isMaxBlock(d.getType())) {
-                    for (int i = 0; i < d.getClassList().size(); i++) {
-                        for (int j = i + 1; j < d.getClassList().size(); j++) {
-                            Class c1 = classes.get(d.getClassList().get(i));
-                            Class c2 = classes.get(d.getClassList().get(j));
-                            String key;
-                            if (c1.getId().compareTo(c2.getId()) < 0) {
-                                key = d.getType() + "_" + c1.getId() + "_" + c2.getId();
-                            } else {
-                                key = d.getType() + "_" + c2.getId() + "_" + c1.getId();
-                            }
-                            if (!resolvedHardDistributions.contains(key)) {
-                                c1.resolveDistributionConflict(d.getType(), c2);
-                                resolvedHardDistributions.add(key);
-                            }
+            if (!MaxDays.isMaxDays(d.getType())
+                && !MaxDayLoad.isMaxDayLoad(d.getType())
+                && !MaxBreaks.isMaxBreaks(d.getType())
+                && !MaxBlock.isMaxBlock(d.getType())) {
+                for (int i = 0; i < d.getClassList().size(); i++) {
+                    for (int j = i + 1; j < d.getClassList().size(); j++) {
+                        Class c1 = classes.get(d.getClassList().get(i));
+                        Class c2 = classes.get(d.getClassList().get(j));
+                        String key;
+                        if (c1.getId().compareTo(c2.getId()) < 0) {
+                            key = d.getType() + "_" + c1.getId() + "_" + c2.getId() + "_" + d.isRequired() + "_" + d.getPenalty();
+                        } else {
+                            key = d.getType() + "_" + c2.getId() + "_" + c1.getId() + "_" + d.isRequired() + "_" + d.getPenalty();
+                        }
+                        if (!resolvedDistributions.contains(key)) {
+                            c1.resolveDistributionConflict(d.getType(), c2, d.isRequired(), d.getPenalty());
+                            resolvedDistributions.add(key);
                         }
                     }
-                } else {
+                }
+            } else {
+                if (d.isRequired()) {
                     if (MaxDays.isMaxDays(d.getType())) {
                         MaxDays.resolve(d.getClassList(), MaxDays.getD(d.getType()));
                     }
@@ -251,7 +259,11 @@ public class Problem {
             }
         }
         LinearExpr expr = LinearExpr.weightedSum(penalties.toArray(new Literal[0]), weights.stream().mapToLong(i -> i).toArray());
-        Factory.getModel().minimize(expr);
+        LinearExprBuilder builder = LinearExpr.newBuilder().add(expr);
+        for (LinearExpr e : softDistributionExpr) {
+            builder.add(e);
+        }
+        Factory.getModel().minimize(builder.build());
     }
 
     @Override

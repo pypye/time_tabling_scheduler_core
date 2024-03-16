@@ -37,7 +37,7 @@ public class SameWeeks {
         }
     }
 
-    public static void resolve(Class i, Class j) {
+    public static void resolve(Class i, Class j, boolean isRequired, int penalty) {
         for (Time t1 : Factory.getProblem().getTimes().values()) {
             if (i.getTimes().get(t1) == null) {
                 continue;
@@ -47,10 +47,7 @@ public class SameWeeks {
                     continue;
                 }
                 if (!SameWeeks.compare(t1, t2)) {
-                    Factory.getModel().addBoolOr(new Literal[]{
-                        i.getTimes().get(t1).not(),
-                        j.getTimes().get(t2).not()
-                    });
+                    Utils.addDistributionConstraint(i.getTimes().get(t1), j.getTimes().get(t2), isRequired, penalty);
                 }
             }
         }

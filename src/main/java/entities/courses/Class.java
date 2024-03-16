@@ -232,55 +232,55 @@ public class Class implements Comparable<Class> {
         }
     }
 
-    public void resolveDistributionConflict(String type, Class x) {
+    public void resolveDistributionConflict(String type, Class x, boolean isRequired, int penalty) {
         switch (type) {
             case "DifferentDays":
-                DifferentDays.resolve(this, x);
+                DifferentDays.resolve(this, x, isRequired, penalty);
                 break;
             case "DifferentRoom":
-                DifferentRoom.resolve(this, x);
+                DifferentRoom.resolve(this, x, isRequired, penalty);
                 break;
             case "DifferentTime":
-                DifferentTime.resolve(this, x);
+                DifferentTime.resolve(this, x, isRequired, penalty);
                 break;
             case "DifferentWeeks":
-                DifferentWeeks.resolve(this, x);
+                DifferentWeeks.resolve(this, x, isRequired, penalty);
                 break;
             case "NotOverlap":
-                NotOverlap.resolve(this, x);
+                NotOverlap.resolve(this, x, isRequired, penalty);
                 break;
             case "Overlap":
-                Overlap.resolve(this, x);
+                Overlap.resolve(this, x, isRequired, penalty);
                 break;
             case "Precedence":
-                Precedence.resolve(this, x);
+                Precedence.resolve(this, x, isRequired, penalty);
                 break;
             case "SameAttendees":
-                SameAttendees.resolve(this, x);
+                SameAttendees.resolve(this, x, isRequired, penalty);
                 break;
             case "SameDays":
-                SameDays.resolve(this, x);
+                SameDays.resolve(this, x, isRequired, penalty);
                 break;
             case "SameRoom":
-                SameRoom.resolve(this, x);
+                SameRoom.resolve(this, x, isRequired, penalty);
                 break;
             case "SameStart":
-                SameStart.resolve(this, x);
+                SameStart.resolve(this, x, isRequired, penalty);
                 break;
             case "SameTime":
-                SameTime.resolve(this, x);
+                SameTime.resolve(this, x, isRequired, penalty);
                 break;
             case "SameWeeks":
-                SameWeeks.resolve(this, x);
+                SameWeeks.resolve(this, x, isRequired, penalty);
                 break;
             default:
                 break;
         }
         if (MinGap.isMinGap(type)) {
-            MinGap.resolve(this, x, MinGap.getG(type));
+            MinGap.resolve(this, x, MinGap.getG(type), isRequired, penalty);
         }
         if (WorkDay.isWorkDayType(type)) {
-            WorkDay.resolve(this, x, WorkDay.getS(type));
+            WorkDay.resolve(this, x, WorkDay.getS(type), isRequired, penalty);
         }
     }
 }

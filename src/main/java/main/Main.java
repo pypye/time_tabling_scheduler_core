@@ -13,7 +13,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        String path = "src/main/resources/data/pu-cs-fal07.xml";
+        String path = "src/main/resources/data/pu-llr-spr07.xml";
         Factory.init(path);
         Solver solver = new Solver();
         solver.buildModel();

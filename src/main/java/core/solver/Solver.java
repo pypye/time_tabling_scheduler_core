@@ -32,7 +32,7 @@ public class Solver {
     public Solver() {
         solver.getParameters().setNumSearchWorkers(16);
         solver.getParameters().setMaxMemoryInMb(16384);
-//        solver.getParameters().setMaxTimeInSeconds(120);
+        solver.getParameters().setMaxTimeInSeconds(300);
         solver.getParameters().setLogSearchProgress(true);
     }
 

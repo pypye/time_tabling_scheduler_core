@@ -1,5 +1,9 @@
 package core.constraints.utils;
 
+import com.google.ortools.sat.Constraint;
+import com.google.ortools.sat.LinearExpr;
+import com.google.ortools.sat.Literal;
+import core.solver.ConstraintHandler;
 import core.solver.Factory;
 import entities.Time;
 
@@ -42,5 +46,21 @@ public class Utils {
             orResult.append(temp_i | temp_j);
         }
         return orResult.toString();
+    }
+
+    public static void addDistributionConstraint(Literal t1, Literal t2, boolean isRequired, int penalty) {
+        if (isRequired) {
+            Factory.getModel().addBoolOr(new Literal[]{t1.not(), t2.not()});
+        } else {
+            Constraint pos = Factory.getModel().addBoolAnd(new Literal[]{t1, t2});
+            Constraint neg = Factory.getModel().addBoolOr(new Literal[]{t1.not(), t2.not()});
+            Literal l = ConstraintHandler.addConstraint(pos, neg);
+            LinearExpr expr = LinearExpr.weightedSum(
+                new Literal[]{l},
+                new long[]{(long) Factory.getProblem().getOptimization().getDistribution() * penalty}
+            );
+            Factory.getProblem().getSoftDistributionExpr().add(expr);
+        }
+
     }
 }

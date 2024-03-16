@@ -1,6 +1,7 @@
 package core.constraints.distributions;
 
 import com.google.ortools.sat.Literal;
+import core.constraints.utils.Utils;
 import core.solver.Factory;
 import entities.Placement;
 import entities.Time;
@@ -38,7 +39,7 @@ public class SameTime {
         }
     }
 
-    public static void resolve(Class i, Class j) {
+    public static void resolve(Class i, Class j, boolean isRequired, int penalty) {
         for (Time t1 : Factory.getProblem().getTimes().values()) {
             if (i.getTimes().get(t1) == null) {
                 continue;
@@ -48,10 +49,7 @@ public class SameTime {
                     continue;
                 }
                 if (!SameTime.compare(t1, t2)) {
-                    Factory.getModel().addBoolOr(new Literal[]{
-                        i.getTimes().get(t1).not(),
-                        j.getTimes().get(t2).not()
-                    });
+                    Utils.addDistributionConstraint(i.getTimes().get(t1), j.getTimes().get(t2), isRequired, penalty);
                 }
             }
         }

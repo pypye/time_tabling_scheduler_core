@@ -1,6 +1,7 @@
 package core.constraints.distributions;
 
 import com.google.ortools.sat.Literal;
+import core.constraints.utils.Utils;
 import core.solver.Factory;
 import entities.Placement;
 import entities.courses.Class;
@@ -34,7 +35,7 @@ public class SameRoom {
         }
     }
 
-    public static void resolve(Class i, Class j) {
+    public static void resolve(Class i, Class j, boolean isRequired, int penalty) {
         if (i.getRoomList().isEmpty() || j.getRoomList().isEmpty()) {
             return;
         }
@@ -47,10 +48,7 @@ public class SameRoom {
                     continue;
                 }
                 if (!SameRoom.compare(r1, r2)) {
-                    Factory.getModel().addBoolOr(new Literal[]{
-                        i.getRooms().get(r1).not(),
-                        j.getRooms().get(r2).not()
-                    });
+                    Utils.addDistributionConstraint(i.getRooms().get(r1), j.getRooms().get(r2), isRequired, penalty);
                 }
             }
         }
