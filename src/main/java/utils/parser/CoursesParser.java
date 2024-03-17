@@ -76,6 +76,9 @@ public class CoursesParser {
                 if (classElement.hasAttribute("limit")) {
                     classObj.setLimit(Integer.parseInt(classElement.getAttribute("limit")));
                 }
+                if (classElement.hasAttribute("parent")) {
+                    classObj.setParentId(classElement.getAttribute("parent"));
+                }
                 classObj.setRoomList(parseRoomClass(classElement.getElementsByTagName("room")));
                 classObj.setTimeList(parseTimeClass(classElement.getElementsByTagName("time")));
                 classMap.put(classObj.getId(), classObj);

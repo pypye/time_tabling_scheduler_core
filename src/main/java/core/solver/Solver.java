@@ -4,6 +4,7 @@ import com.google.ortools.sat.CpSolver;
 import com.google.ortools.sat.CpSolverStatus;
 import com.google.ortools.sat.Literal;
 import entities.Placement;
+import entities.Student;
 import entities.Time;
 import entities.courses.Class;
 import entities.rooms.Room;
@@ -32,7 +33,7 @@ public class Solver {
     public Solver() {
         solver.getParameters().setNumSearchWorkers(16);
         solver.getParameters().setMaxMemoryInMb(16384);
-        solver.getParameters().setMaxTimeInSeconds(300);
+        solver.getParameters().setMaxTimeInSeconds(60);
         solver.getParameters().setLogSearchProgress(true);
     }
 
@@ -50,6 +51,10 @@ public class Solver {
         }
         Factory.getProblem().resolvePlacementOverlapConflict();
         Factory.getProblem().resolvePlacementDistributionConflict();
+        for (Student s : Factory.getProblem().getStudents().values()) {
+            s.init();
+        }
+        Factory.getProblem().resolveStudentClassLimit();
         Factory.getProblem().computePenaltyObjective();
     }
 
@@ -118,6 +123,13 @@ public class Solver {
                     e.setAttribute("weeks", time.getWeeks());
                 }
                 rootEle.appendChild(e);
+                for (Student s : Factory.getProblem().getStudents().values()) {
+                    if (s.getClasses().containsKey(x) && solver.value(s.getClasses().get(x)) == 1) {
+                        Element f = dom.createElement("student");
+                        f.setAttribute("id", s.getId());
+                        e.appendChild(f);
+                    }
+                }
             }
             try {
                 Transformer tr = TransformerFactory.newInstance().newTransformer();

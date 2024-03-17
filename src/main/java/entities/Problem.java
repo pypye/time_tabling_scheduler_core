@@ -24,32 +24,22 @@ public class Problem {
 
     private Optimization optimization;
 
-    private Map<String, Room> rooms;
-    private Map<String, Time> times;
-    private Map<String, Course> courses;
-    private Map<String, Class> classes;
-    private Map<String, Student> students;
-    private List<Distribution> distributions;
+    private Map<String, Room> rooms = new HashMap<>();
+    private Map<String, Time> times = new HashMap<>();
+    private Map<String, Course> courses = new HashMap<>();
+    private Map<String, Class> classes = new LinkedHashMap<>();
+    private Map<String, Student> students = new HashMap<>();
+    private List<Distribution> distributions = new ArrayList<>();
 
-    private final Map<Placement, ArrayList<Literal>> placementConflicts;
+    private final Map<Placement, Literal> placements = new HashMap<>(); // all possible placements
 
-    private final Map<Placement, Literal> placements;
+    private final Map<Placement, ArrayList<Literal>> placementConflicts = new HashMap<>(); // placement conflict for 2 classes not overlap
 
-    private final Set<String> resolvedDistributions;
+    private final Map<Placement, ArrayList<Class>> placementClasses = new HashMap<>(); // placement x has list of classes that can be placed in x
 
-    private final ArrayList<LinearExpr> softDistributionExpr;
+    private final ArrayList<LinearExpr> softDistributionExpr = new ArrayList<>(); // soft distribution constraint
 
     public Problem() {
-        rooms = new HashMap<>();
-        times = new HashMap<>();
-        courses = new HashMap<>();
-        classes = new LinkedHashMap<>();
-        students = new HashMap<>();
-        distributions = new ArrayList<>();
-        placements = new HashMap<>();
-        placementConflicts = new HashMap<>();
-        resolvedDistributions = new HashSet<>();
-        softDistributionExpr = new ArrayList<>();
     }
 
     public String getName() {
@@ -148,6 +138,10 @@ public class Problem {
         return placements;
     }
 
+    public Map<Placement, ArrayList<Class>> getPlacementClasses() {
+        return placementClasses;
+    }
+
     public ArrayList<LinearExpr> getSoftDistributionExpr() {
         return softDistributionExpr;
     }
@@ -203,6 +197,7 @@ public class Problem {
     }
 
     public void resolvePlacementDistributionConflict() {
+        Set<String> resolvedDistributions = new HashSet<>();
         int count = 0;
         for (Distribution d : distributions) {
             count++;
@@ -240,6 +235,23 @@ public class Problem {
         }
     }
 
+    public void resolveStudentClassLimit() {
+        for (Class c : classes.values()) {
+            ArrayList<Literal> classLit = new ArrayList<>();
+            for (Student s : students.values()) {
+                if (!s.getClasses().containsKey(c)) {
+                    continue;
+                }
+                Literal scl = s.getClasses().get(c);
+                classLit.add(scl);
+            }
+            if (!classLit.isEmpty()) {
+                LinearExpr expr = LinearExpr.sum(classLit.toArray(new Literal[0]));
+                Factory.getModel().addLessOrEqual(expr, c.getLimit());
+            }
+        }
+    }
+
     public void computePenaltyObjective() {
         ArrayList<Literal> penalties = new ArrayList<>();
         ArrayList<Integer> weights = new ArrayList<>();
@@ -258,6 +270,7 @@ public class Problem {
                 }
             }
         }
+
         LinearExpr expr = LinearExpr.weightedSum(penalties.toArray(new Literal[0]), weights.stream().mapToLong(i -> i).toArray());
         LinearExprBuilder builder = LinearExpr.newBuilder().add(expr);
         for (LinearExpr e : softDistributionExpr) {

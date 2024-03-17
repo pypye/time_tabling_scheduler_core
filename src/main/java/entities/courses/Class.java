@@ -18,6 +18,8 @@ import java.util.Map;
 public class Class implements Comparable<Class> {
     private String id;
     private int limit;
+
+    private String parentId = null;
     private ArrayList<Penalty<Room>> roomList;
     private ArrayList<Penalty<Time>> timeList;
 
@@ -42,8 +44,7 @@ public class Class implements Comparable<Class> {
                     Time t = pt.getEntity();
                     if (!Unavailable.compare(r, t)) {
                         Placement p = new Placement(r, t);
-                        this.placements.put(p, null);
-                        Factory.getProblem().getPlacements().put(p, null);
+                        this.addPlacement(p);
                     }
                 }
             }
@@ -51,10 +52,18 @@ public class Class implements Comparable<Class> {
             for (Penalty<Time> pt : this.timeList) {
                 Time t = pt.getEntity();
                 Placement p = new Placement(null, t);
-                this.placements.put(p, null);
-                Factory.getProblem().getPlacements().put(p, null);
+                this.addPlacement(p);
             }
         }
+    }
+
+    private void addPlacement(Placement p) {
+        this.placements.put(p, null);
+        Factory.getProblem().getPlacements().put(p, null);
+        if (!Factory.getProblem().getPlacementClasses().containsKey(p)) {
+            Factory.getProblem().getPlacementClasses().put(p, new ArrayList<>());
+        }
+        Factory.getProblem().getPlacementClasses().get(p).add(this);
     }
 
     public void makeRoomAndTimeLiteral() {
@@ -134,6 +143,14 @@ public class Class implements Comparable<Class> {
 
     public void setLimit(int limit) {
         this.limit = limit;
+    }
+
+    public String getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
     }
 
     public ArrayList<Penalty<Room>> getRoomList() {
