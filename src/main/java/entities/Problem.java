@@ -4,10 +4,8 @@ import com.google.ortools.sat.LinearExpr;
 import com.google.ortools.sat.LinearExprBuilder;
 import com.google.ortools.sat.Literal;
 import core.constraints.defaults.TwoClassOverlap;
-import core.constraints.distributions.MaxBlock;
-import core.constraints.distributions.MaxBreaks;
-import core.constraints.distributions.MaxDayLoad;
-import core.constraints.distributions.MaxDays;
+import core.constraints.distributions.*;
+import core.constraints.utils.Utils;
 import core.solver.Factory;
 import entities.courses.Class;
 import entities.courses.Course;
@@ -197,40 +195,29 @@ public class Problem {
     }
 
     public void resolvePlacementDistributionConflict() {
-        Set<String> resolvedDistributions = new HashSet<>();
         int count = 0;
         for (Distribution d : distributions) {
             count++;
             System.out.println("Distribution " + count + " of " + distributions.size() + " : " + d);
-            if (!MaxDays.isMaxDays(d.getType())
-                && !MaxDayLoad.isMaxDayLoad(d.getType())
-                && !MaxBreaks.isMaxBreaks(d.getType())
-                && !MaxBlock.isMaxBlock(d.getType())) {
-                for (int i = 0; i < d.getClassList().size(); i++) {
-                    for (int j = i + 1; j < d.getClassList().size(); j++) {
-                        Class c1 = classes.get(d.getClassList().get(i));
-                        Class c2 = classes.get(d.getClassList().get(j));
-                        String key;
-                        if (c1.getId().compareTo(c2.getId()) < 0) {
-                            key = d.getType() + "_" + c1.getId() + "_" + c2.getId() + "_" + d.isRequired() + "_" + d.getPenalty();
-                        } else {
-                            key = d.getType() + "_" + c2.getId() + "_" + c1.getId() + "_" + d.isRequired() + "_" + d.getPenalty();
-                        }
-                        if (!resolvedDistributions.contains(key)) {
-                            c1.resolveDistributionConflict(d.getType(), c2, d.isRequired(), d.getPenalty());
-                            resolvedDistributions.add(key);
-                        }
-                    }
-                }
-            } else {
-                if (d.isRequired()) {
-                    if (MaxDays.isMaxDays(d.getType())) {
-                        MaxDays.resolve(d.getClassList(), MaxDays.getD(d.getType()));
-                    }
-                    if (MaxDayLoad.isMaxDayLoad(d.getType())) {
-                        MaxDayLoad.resolve(d.getClassList(), MaxDayLoad.getS(d.getType()));
-                    }
-                }
+            switch (d.getType()) {
+                case "DifferentDays", "DifferentWeeks", "DifferentTime", "NotOverlap", "Overlap", "SameDays",
+                     "SameStart", "SameTime", "SameWeeks":
+                    this.distributionConflictWithTime(d);
+                    break;
+                case "DifferentRoom", "SameRoom":
+                    this.distributionConflictWithRoom(d);
+                    break;
+                case "SameAttendees":
+                    this.distributionConflictWithPlacement(d);
+                    break;
+                default:
+                    break;
+            }
+            if (MinGap.isMinGap(d.getType())) {
+                this.distributionConflictWithTime(d);
+            }
+            if (WorkDay.isWorkDayType(d.getType())) {
+                this.distributionConflictWithTime(d);
             }
         }
     }
@@ -282,5 +269,213 @@ public class Problem {
     @Override
     public String toString() {
         return StringFormatter.printObject(this);
+    }
+
+
+    private void distributionConflictWithPlacement(Distribution d) {
+        Map<Placement, Literal> pLit = new HashMap<>();
+        Map<Placement, ArrayList<Literal>> pLitConflict = new HashMap<>();
+
+        for (int i = 0; i < d.getClassList().size(); i++) {
+            Class c = classes.get(d.getClassList().get(i));
+            for (Placement p : c.getPlacements().keySet()) {
+                if (!pLit.containsKey(p)) {
+                    pLit.put(p, Factory.getModel().newBoolVar("xp_" + p));
+                }
+            }
+        }
+
+        for (Placement p : pLit.keySet()) {
+            for (Placement q : pLit.keySet()) {
+                if (p.equals(q)) {
+                    continue;
+                }
+                this.resolveDistributionConflictWithPlacement(d.getType(), p, q, pLit.get(p), pLit.get(q), d.isRequired(), d.getPenalty());
+            }
+        }
+
+        for (int i = 0; i < d.getClassList().size(); i++) {
+            Class c = classes.get(d.getClassList().get(i));
+            for (Placement p : c.getPlacements().keySet()) {
+                Literal cpl = c.getPlacements().get(p);
+                Literal cpld = pLit.get(p);
+                Factory.getModel().addImplication(cpl, cpld);
+                if (!pLitConflict.containsKey(p)) {
+                    pLitConflict.put(p, new ArrayList<>());
+                }
+            }
+        }
+
+        if (d.isRequired()) {
+            for (Placement p : pLitConflict.keySet()) {
+                Factory.getModel().addAtMostOne(pLitConflict.get(p).toArray(new Literal[0]));
+            }
+        } else {
+            for (Placement p : pLitConflict.keySet()) {
+                addSoftDistributionConstraint(d, pLitConflict.get(p));
+            }
+        }
+    }
+
+    private void distributionConflictWithTime(Distribution d) {
+        Map<Time, Literal> pTime = new HashMap<>();
+        Map<Time, ArrayList<Literal>> pTimeConflict = new HashMap<>();
+
+        for (int i = 0; i < d.getClassList().size(); i++) {
+            Class c = classes.get(d.getClassList().get(i));
+            for (Time t : c.getTimes().keySet()) {
+                if (!pTime.containsKey(t)) {
+                    pTime.put(t, Factory.getModel().newBoolVar("xpt_" + t));
+                }
+            }
+        }
+
+        for (Time p : pTime.keySet()) {
+            for (Time q : pTime.keySet()) {
+                if (p.equals(q)) {
+                    continue;
+                }
+                this.resolveDistributionConflictWithTime(d.getType(), p, q, pTime.get(p), pTime.get(q), d.isRequired(), d.getPenalty());
+            }
+        }
+
+        for (int i = 0; i < d.getClassList().size(); i++) {
+            Class c = classes.get(d.getClassList().get(i));
+            for (Placement p : c.getPlacements().keySet()) {
+                Time t = p.getTime();
+                Literal cpl = c.getPlacements().get(p);
+                Literal ctd = pTime.get(t);
+                Factory.getModel().addImplication(cpl, ctd);
+                if (!pTimeConflict.containsKey(t)) {
+                    pTimeConflict.put(t, new ArrayList<>());
+                }
+                pTimeConflict.get(t).add(cpl);
+            }
+        }
+        if (d.isRequired()) {
+            for (Time t : pTimeConflict.keySet()) {
+                Factory.getModel().addAtMostOne(pTimeConflict.get(t).toArray(new Literal[0]));
+            }
+        } else {
+            for (Time t : pTimeConflict.keySet()) {
+                addSoftDistributionConstraint(d, pTimeConflict.get(t));
+            }
+        }
+    }
+
+    private void distributionConflictWithRoom(Distribution d) {
+        Map<Room, Literal> pRoom = new HashMap<>();
+        Map<Room, ArrayList<Literal>> pRoomConflict = new HashMap<>();
+
+        for (int i = 0; i < d.getClassList().size(); i++) {
+            Class c = classes.get(d.getClassList().get(i));
+            for (Room r : c.getRooms().keySet()) {
+                if (!pRoom.containsKey(r)) {
+                    pRoom.put(r, Factory.getModel().newBoolVar("xpr_" + r));
+                }
+            }
+        }
+
+        for (Room p : pRoom.keySet()) {
+            for (Room q : pRoom.keySet()) {
+                if (p.equals(q)) {
+                    continue;
+                }
+                this.resolveDistributionConflictWithRoom(d.getType(), p, q, pRoom.get(p), pRoom.get(q), d.isRequired(), d.getPenalty());
+            }
+        }
+
+        for (int i = 0; i < d.getClassList().size(); i++) {
+            Class c = classes.get(d.getClassList().get(i));
+            for (Placement p : c.getPlacements().keySet()) {
+                Room t = p.getRoom();
+                Literal cpl = c.getPlacements().get(p);
+                Literal ctr = pRoom.get(t);
+                Factory.getModel().addImplication(cpl, ctr);
+                if (!pRoomConflict.containsKey(t)) {
+                    pRoomConflict.put(t, new ArrayList<>());
+                }
+            }
+        }
+
+        if (d.isRequired()) {
+            for (Room t : pRoomConflict.keySet()) {
+                Factory.getModel().addAtMostOne(pRoomConflict.get(t).toArray(new Literal[0]));
+            }
+        } else {
+            for (Room t : pRoomConflict.keySet()) {
+                addSoftDistributionConstraint(d, pRoomConflict.get(t));
+            }
+        }
+    }
+
+    private void addSoftDistributionConstraint(Distribution d, ArrayList<Literal> literals) {
+        for (int i = 0; i < literals.size(); i++) {
+            for (int j = i + 1; j < literals.size(); j++) {
+                Utils.addDistributionConstraint(literals.get(i), literals.get(j), d.isRequired(), d.getPenalty());
+            }
+        }
+    }
+
+    private void resolveDistributionConflictWithPlacement(String type, Placement p, Placement q, Literal l1, Literal l2, boolean isRequired, int penalty) {
+        if (type.equals("SameAttendees")) {
+            SameAttendees.resolve(p, q, l1, l2, isRequired, penalty);
+        }
+    }
+
+    private void resolveDistributionConflictWithTime(String type, Time p, Time q, Literal l1, Literal l2, boolean isRequired, int penalty) {
+        switch (type) {
+            case "DifferentDays":
+                DifferentDays.resolve(p, q, l1, l2, isRequired, penalty);
+                break;
+            case "DifferentTime":
+                DifferentTime.resolve(p, q, l1, l2, isRequired, penalty);
+                break;
+            case "DifferentWeeks":
+                DifferentWeeks.resolve(p, q, l1, l2, isRequired, penalty);
+                break;
+            case "NotOverlap":
+                NotOverlap.resolve(p, q, l1, l2, isRequired, penalty);
+                break;
+            case "Overlap":
+                Overlap.resolve(p, q, l1, l2, isRequired, penalty);
+                break;
+            case "Precedence":
+                Precedence.resolve(p, q, l1, l2, isRequired, penalty);
+                break;
+            case "SameDays":
+                SameDays.resolve(p, q, l1, l2, isRequired, penalty);
+                break;
+            case "SameStart":
+                SameStart.resolve(p, q, l1, l2, isRequired, penalty);
+                break;
+            case "SameTime":
+                SameTime.resolve(p, q, l1, l2, isRequired, penalty);
+                break;
+            case "SameWeeks":
+                SameWeeks.resolve(p, q, l1, l2, isRequired, penalty);
+                break;
+            default:
+                break;
+        }
+        if (MinGap.isMinGap(type)) {
+            MinGap.resolve(p, q, MinGap.getG(type), l1, l2, isRequired, penalty);
+        }
+        if (WorkDay.isWorkDayType(type)) {
+            WorkDay.resolve(p, q, WorkDay.getS(type), l1, l2, isRequired, penalty);
+        }
+    }
+
+    private void resolveDistributionConflictWithRoom(String type, Room p, Room q, Literal l1, Literal l2, boolean isRequired, int penalty) {
+        switch (type) {
+            case "DifferentRoom":
+                DifferentRoom.resolve(p, q, l1, l2, isRequired, penalty);
+                break;
+            case "SameRoom":
+                SameRoom.resolve(p, q, l1, l2, isRequired, penalty);
+                break;
+            default:
+                break;
+        }
     }
 }

@@ -35,22 +35,9 @@ public class SameRoom {
         }
     }
 
-    public static void resolve(Class i, Class j, boolean isRequired, int penalty) {
-        if (i.getRoomList().isEmpty() || j.getRoomList().isEmpty()) {
-            return;
-        }
-        for (Room r1 : Factory.getProblem().getRooms().values()) {
-            if (i.getRooms().get(r1) == null) {
-                continue;
-            }
-            for (Room r2 : Factory.getProblem().getRooms().values()) {
-                if (j.getRooms().get(r2) == null) {
-                    continue;
-                }
-                if (!SameRoom.compare(r1, r2)) {
-                    Utils.addDistributionConstraint(i.getRooms().get(r1), j.getRooms().get(r2), isRequired, penalty);
-                }
-            }
+    public static void resolve(Room p, Room q, Literal l1, Literal l2, boolean isRequired, int penalty) {
+        if (!compare(p, q)) {
+            Utils.addDistributionConstraint(l1, l2, isRequired, penalty);
         }
     }
 }

@@ -61,6 +61,5 @@ public class Utils {
             );
             Factory.getProblem().getSoftDistributionExpr().add(expr);
         }
-
     }
 }

@@ -2,7 +2,6 @@ package core.constraints.distributions;
 
 import com.google.ortools.sat.Literal;
 import core.constraints.utils.Utils;
-import core.solver.Factory;
 import entities.Placement;
 import entities.Time;
 import entities.courses.Class;
@@ -27,6 +26,7 @@ public class WorkDay {
         int pos1 = t.indexOf(")");
         return Integer.parseInt(t.substring(pos0 + 1, pos1));
     }
+
     public static void remove(Class i, Class j, int S) {
         List<Placement> removeList = new ArrayList<>();
         if (i.getRoomList().isEmpty() || j.getRoomList().isEmpty()) {
@@ -49,19 +49,9 @@ public class WorkDay {
         }
     }
 
-    public static void resolve(Class i, Class j, int S, boolean isRequired, int penalty) {
-        for (Time t1 : Factory.getProblem().getTimes().values()) {
-            if (i.getTimes().get(t1) == null) {
-                continue;
-            }
-            for (Time t2 : Factory.getProblem().getTimes().values()) {
-                if (j.getTimes().get(t2) == null) {
-                    continue;
-                }
-                if (!WorkDay.compare(t1, t2, S)) {
-                    Utils.addDistributionConstraint(i.getTimes().get(t1), j.getTimes().get(t2), isRequired, penalty);
-                }
-            }
+    public static void resolve(Time p, Time q, int S, Literal l1, Literal l2, boolean isRequired, int penalty) {
+        if (!compare(p, q, S)) {
+            Utils.addDistributionConstraint(l1, l2, isRequired, penalty);
         }
     }
 }

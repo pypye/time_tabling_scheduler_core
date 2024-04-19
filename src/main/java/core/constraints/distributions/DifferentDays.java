@@ -1,5 +1,6 @@
 package core.constraints.distributions;
 
+import com.google.ortools.sat.Literal;
 import core.constraints.utils.Utils;
 import core.solver.Factory;
 import entities.Placement;
@@ -41,19 +42,9 @@ public class DifferentDays {
         }
     }
 
-    public static void resolve(Class i, Class j, boolean isRequired, int penalty) {
-        for (Time t1 : Factory.getProblem().getTimes().values()) {
-            if (i.getTimes().get(t1) == null) {
-                continue;
-            }
-            for (Time t2 : Factory.getProblem().getTimes().values()) {
-                if (j.getTimes().get(t2) == null) {
-                    continue;
-                }
-                if (!DifferentDays.compare(t1, t2)) {
-                    Utils.addDistributionConstraint(i.getTimes().get(t1), j.getTimes().get(t2), isRequired, penalty);
-                }
-            }
+    public static void resolve(Time p, Time q, Literal l1, Literal l2, boolean isRequired, int penalty) {
+        if (!compare(p, q)) {
+            Utils.addDistributionConstraint(l1, l2, isRequired, penalty);
         }
     }
 }

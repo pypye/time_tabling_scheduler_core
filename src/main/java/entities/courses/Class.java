@@ -29,10 +29,6 @@ public class Class implements Comparable<Class> {
 
     private final Map<Time, Literal> times = new HashMap<>();
 
-    private final ArrayList<Literal> days = new ArrayList<>();
-
-    private final ArrayList<Literal> weeks = new ArrayList<>();
-
     public Class() {
     }
 
@@ -84,13 +80,6 @@ public class Class implements Comparable<Class> {
     }
 
     public void mapClassPlacementToGlobalPlacement() {
-        for (int i = 0; i < Factory.getProblem().getNrDays(); i++) {
-            this.days.add(i, Factory.getModel().newBoolVar("c" + this.id + "_d_" + i));
-        }
-        for (int i = 0; i < Factory.getProblem().getNrWeeks(); i++) {
-            this.weeks.add(i, Factory.getModel().newBoolVar("c" + this.id + "_w_" + i));
-        }
-
         for (Placement p : this.placements.keySet()) {
             Literal cpl = Factory.getModel().newBoolVar("c" + this.id + "_" + p);
             Literal cr = this.rooms.get(p.getRoom());
@@ -102,22 +91,6 @@ public class Class implements Comparable<Class> {
                 Factory.getModel().addImplication(cpl, cr);
             }
             Factory.getModel().addImplication(cpl, ct);
-
-            for (int i = 0; i < Factory.getProblem().getNrDays(); i++) {
-                if (p.getTime().getDays().charAt(i) == '1') {
-                    Factory.getModel().addImplication(cpl, this.days.get(i));
-                } else {
-                    Factory.getModel().addImplication(cpl, this.days.get(i).not());
-                }
-            }
-
-            for (int i = 0; i < Factory.getProblem().getNrWeeks(); i++) {
-                if (p.getTime().getWeeks().charAt(i) == '1') {
-                    Factory.getModel().addImplication(cpl, this.weeks.get(i));
-                } else {
-                    Factory.getModel().addImplication(cpl, this.weeks.get(i).not());
-                }
-            }
 
             if (!this.getRoomList().isEmpty()) {
                 if (!Factory.getProblem().getPlacementConflicts().containsKey(p)) {
@@ -181,14 +154,6 @@ public class Class implements Comparable<Class> {
         return times;
     }
 
-    public ArrayList<Literal> getDays() {
-        return days;
-    }
-
-    public ArrayList<Literal> getWeeks() {
-        return weeks;
-    }
-
     @Override
     public String toString() {
         return StringFormatter.printObject(this);
@@ -246,58 +211,6 @@ public class Class implements Comparable<Class> {
         }
         if (WorkDay.isWorkDayType(type)) {
             WorkDay.remove(this, x, WorkDay.getS(type));
-        }
-    }
-
-    public void resolveDistributionConflict(String type, Class x, boolean isRequired, int penalty) {
-        switch (type) {
-            case "DifferentDays":
-                DifferentDays.resolve(this, x, isRequired, penalty);
-                break;
-            case "DifferentRoom":
-                DifferentRoom.resolve(this, x, isRequired, penalty);
-                break;
-            case "DifferentTime":
-                DifferentTime.resolve(this, x, isRequired, penalty);
-                break;
-            case "DifferentWeeks":
-                DifferentWeeks.resolve(this, x, isRequired, penalty);
-                break;
-            case "NotOverlap":
-                NotOverlap.resolve(this, x, isRequired, penalty);
-                break;
-            case "Overlap":
-                Overlap.resolve(this, x, isRequired, penalty);
-                break;
-            case "Precedence":
-                Precedence.resolve(this, x, isRequired, penalty);
-                break;
-            case "SameAttendees":
-                SameAttendees.resolve(this, x, isRequired, penalty);
-                break;
-            case "SameDays":
-                SameDays.resolve(this, x, isRequired, penalty);
-                break;
-            case "SameRoom":
-                SameRoom.resolve(this, x, isRequired, penalty);
-                break;
-            case "SameStart":
-                SameStart.resolve(this, x, isRequired, penalty);
-                break;
-            case "SameTime":
-                SameTime.resolve(this, x, isRequired, penalty);
-                break;
-            case "SameWeeks":
-                SameWeeks.resolve(this, x, isRequired, penalty);
-                break;
-            default:
-                break;
-        }
-        if (MinGap.isMinGap(type)) {
-            MinGap.resolve(this, x, MinGap.getG(type), isRequired, penalty);
-        }
-        if (WorkDay.isWorkDayType(type)) {
-            WorkDay.resolve(this, x, WorkDay.getS(type), isRequired, penalty);
         }
     }
 }
