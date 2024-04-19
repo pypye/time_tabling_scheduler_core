@@ -2,7 +2,6 @@ package core.constraints.distributions;
 
 import com.google.ortools.sat.Literal;
 import core.constraints.utils.Utils;
-import core.solver.Factory;
 import entities.Placement;
 import entities.Time;
 import entities.courses.Class;

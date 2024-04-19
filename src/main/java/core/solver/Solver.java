@@ -34,7 +34,7 @@ public class Solver {
         solver.getParameters().setNumSearchWorkers(16);
         solver.getParameters().setMaxMemoryInMb(32768);
         solver.getParameters().setLogSearchProgress(true);
-        solver.getParameters().setMaxTimeInSeconds(300);
+        solver.getParameters().setMaxTimeInSeconds(600);
     }
 
     public void buildModel() {
