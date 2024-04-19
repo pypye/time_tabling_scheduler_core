@@ -33,7 +33,7 @@ public class Solver {
     public Solver() {
         solver.getParameters().setNumSearchWorkers(16);
         solver.getParameters().setMaxMemoryInMb(16384);
-        solver.getParameters().setMaxTimeInSeconds(60);
+        solver.getParameters().setMaxTimeInSeconds(600);
         solver.getParameters().setLogSearchProgress(true);
     }
 
@@ -51,10 +51,6 @@ public class Solver {
         }
         Factory.getProblem().resolvePlacementOverlapConflict();
         Factory.getProblem().resolvePlacementDistributionConflict();
-        for (Student s : Factory.getProblem().getStudents().values()) {
-            s.init();
-        }
-        Factory.getProblem().resolveStudentClassLimit();
         Factory.getProblem().computePenaltyObjective();
     }
 

@@ -29,10 +29,6 @@ public class Class implements Comparable<Class> {
 
     private final Map<Time, Literal> times = new HashMap<>();
 
-    private final ArrayList<Literal> days = new ArrayList<>();
-
-    private final ArrayList<Literal> weeks = new ArrayList<>();
-
     public Class() {
     }
 
@@ -73,23 +69,15 @@ public class Class implements Comparable<Class> {
                 Literal lr = Factory.getModel().newBoolVar("c" + this.id + "_r" + r);
                 this.rooms.put(r, lr);
             }
-            Factory.getModel().addExactlyOne(this.rooms.values());
         }
         for (Penalty<Time> pt : this.timeList) {
             Time t = pt.getEntity();
             Literal lt = Factory.getModel().newBoolVar("c" + this.id + "_t" + t);
             this.times.put(t, lt);
         }
-        Factory.getModel().addExactlyOne(this.times.values());
     }
 
     public void mapClassPlacementToGlobalPlacement() {
-        for (int i = 0; i < Factory.getProblem().getNrDays(); i++) {
-            this.days.add(i, Factory.getModel().newBoolVar("c" + this.id + "_d_" + i));
-        }
-        for (int i = 0; i < Factory.getProblem().getNrWeeks(); i++) {
-            this.weeks.add(i, Factory.getModel().newBoolVar("c" + this.id + "_w_" + i));
-        }
 
         for (Placement p : this.placements.keySet()) {
             Literal cpl = Factory.getModel().newBoolVar("c" + this.id + "_" + p);
@@ -102,22 +90,6 @@ public class Class implements Comparable<Class> {
                 Factory.getModel().addImplication(cpl, cr);
             }
             Factory.getModel().addImplication(cpl, ct);
-
-            for (int i = 0; i < Factory.getProblem().getNrDays(); i++) {
-                if (p.getTime().getDays().charAt(i) == '1') {
-                    Factory.getModel().addImplication(cpl, this.days.get(i));
-                } else {
-                    Factory.getModel().addImplication(cpl, this.days.get(i).not());
-                }
-            }
-
-            for (int i = 0; i < Factory.getProblem().getNrWeeks(); i++) {
-                if (p.getTime().getWeeks().charAt(i) == '1') {
-                    Factory.getModel().addImplication(cpl, this.weeks.get(i));
-                } else {
-                    Factory.getModel().addImplication(cpl, this.weeks.get(i).not());
-                }
-            }
 
             if (!this.getRoomList().isEmpty()) {
                 if (!Factory.getProblem().getPlacementConflicts().containsKey(p)) {
@@ -179,14 +151,6 @@ public class Class implements Comparable<Class> {
 
     public Map<Time, Literal> getTimes() {
         return times;
-    }
-
-    public ArrayList<Literal> getDays() {
-        return days;
-    }
-
-    public ArrayList<Literal> getWeeks() {
-        return weeks;
     }
 
     @Override
@@ -271,9 +235,6 @@ public class Class implements Comparable<Class> {
                 break;
             case "Precedence":
                 Precedence.resolve(this, x, isRequired, penalty);
-                break;
-            case "SameAttendees":
-                SameAttendees.resolve(this, x, isRequired, penalty);
                 break;
             case "SameDays":
                 SameDays.resolve(this, x, isRequired, penalty);

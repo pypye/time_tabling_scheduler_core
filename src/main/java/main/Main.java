@@ -13,7 +13,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        String path = "src/main/resources/data/wbg-fal10.xml";
+        String path = "src/main/resources/data/tg-spr18.xml";
         Factory.init(path);
         Solver solver = new Solver();
         solver.buildModel();

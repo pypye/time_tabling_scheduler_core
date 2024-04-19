@@ -4,10 +4,8 @@ import com.google.ortools.sat.LinearExpr;
 import com.google.ortools.sat.LinearExprBuilder;
 import com.google.ortools.sat.Literal;
 import core.constraints.defaults.TwoClassOverlap;
-import core.constraints.distributions.MaxBlock;
-import core.constraints.distributions.MaxBreaks;
-import core.constraints.distributions.MaxDayLoad;
-import core.constraints.distributions.MaxDays;
+import core.constraints.distributions.SameAttendees;
+import core.constraints.utils.Utils;
 import core.solver.Factory;
 import entities.courses.Class;
 import entities.courses.Course;
@@ -202,10 +200,7 @@ public class Problem {
         for (Distribution d : distributions) {
             count++;
             System.out.println("Distribution " + count + " of " + distributions.size() + " : " + d);
-            if (!MaxDays.isMaxDays(d.getType())
-                && !MaxDayLoad.isMaxDayLoad(d.getType())
-                && !MaxBreaks.isMaxBreaks(d.getType())
-                && !MaxBlock.isMaxBlock(d.getType())) {
+            if (!d.getType().equals("SameAttendees")) {
                 for (int i = 0; i < d.getClassList().size(); i++) {
                     for (int j = i + 1; j < d.getClassList().size(); j++) {
                         Class c1 = classes.get(d.getClassList().get(i));
@@ -223,14 +218,7 @@ public class Problem {
                     }
                 }
             } else {
-                if (d.isRequired()) {
-                    if (MaxDays.isMaxDays(d.getType())) {
-                        MaxDays.resolve(d.getClassList(), MaxDays.getD(d.getType()));
-                    }
-                    if (MaxDayLoad.isMaxDayLoad(d.getType())) {
-                        MaxDayLoad.resolve(d.getClassList(), MaxDayLoad.getS(d.getType()));
-                    }
-                }
+                distributionConflictSameAttendees(d);
             }
         }
     }
@@ -277,6 +265,56 @@ public class Problem {
             builder.add(e);
         }
         Factory.getModel().minimize(builder.build());
+    }
+
+    private void distributionConflictSameAttendees(Distribution d) {
+        Map<Placement, Literal> pLit = new HashMap<>();
+        Map<Placement, ArrayList<Literal>> pLitConflict = new HashMap<>();
+
+        for (int i = 0; i < d.getClassList().size(); i++) {
+            Class c = classes.get(d.getClassList().get(i));
+            for (Placement p : c.getPlacements().keySet()) {
+                if (!pLit.containsKey(p)) {
+                    pLit.put(p, Factory.getModel().newBoolVar("xp_" + p + "_" + d));
+                }
+            }
+        }
+
+        for (Placement p : pLit.keySet()) {
+            for (Placement q : pLit.keySet()) {
+                if (p.equals(q)) {
+                    continue;
+                }
+                SameAttendees.resolve(p, q, pLit.get(p), pLit.get(q), d.isRequired(), d.getPenalty());
+            }
+        }
+
+        for (int i = 0; i < d.getClassList().size(); i++) {
+            Class c = classes.get(d.getClassList().get(i));
+            for (Placement p : c.getPlacements().keySet()) {
+                Literal cpl = c.getPlacements().get(p);
+                Literal cpld = pLit.get(p);
+                Factory.getModel().addImplication(cpl, cpld);
+                if (!pLitConflict.containsKey(p)) {
+                    pLitConflict.put(p, new ArrayList<>());
+                }
+                pLitConflict.get(p).add(cpl);
+            }
+        }
+
+        if (d.isRequired()) {
+            for (Placement p : pLitConflict.keySet()) {
+                Factory.getModel().addAtMostOne(pLitConflict.get(p).toArray(new Literal[0]));
+            }
+        } else {
+            for (Placement p : pLitConflict.keySet()) {
+                for (int i = 0; i < pLitConflict.get(p).size(); i++) {
+                    for (int j = i + 1; j < pLitConflict.get(p).size(); j++) {
+                        Utils.addDistributionConstraint(pLitConflict.get(p).get(i), pLitConflict.get(p).get(j), d.isRequired(), d.getPenalty());
+                    }
+                }
+            }
+        }
     }
 
     @Override

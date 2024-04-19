@@ -1,5 +1,6 @@
 package core.constraints.distributions;
 
+import com.google.ortools.sat.Literal;
 import core.constraints.utils.Utils;
 import entities.Placement;
 import entities.Time;
@@ -51,13 +52,9 @@ public class SameAttendees {
         }
     }
 
-    public static void resolve(Class i, Class j, boolean isRequired, int penalty) {
-        for (Placement p : i.getPlacements().keySet()) {
-            for (Placement q : j.getPlacements().keySet()) {
-                if (!SameAttendees.compare(p.getRoom(), q.getRoom(), p.getTime(), q.getTime())) {
-                    Utils.addDistributionConstraint(i.getPlacements().get(p), j.getPlacements().get(q), isRequired, penalty);
-                }
-            }
+    public static void resolve(Placement p, Placement q, Literal l1, Literal l2, boolean isRequired, int penalty) {
+        if (!compare(p.getRoom(), q.getRoom(), p.getTime(), q.getTime())) {
+            Utils.addDistributionConstraint(l1, l2, isRequired, penalty);
         }
     }
 }
